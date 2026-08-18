@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#8B0000">
+<meta name="description" content="تقديم شكوى جديدة - نظام الشكاوى الإلكتروني - مركز القلب والقسطرة القلبية">
+<title>شكوى جديدة | نظام الشكاوى | مركز القلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root {
+  --gold:#D4AF37; --gold-light:#F0D060; --gold-dim:rgba(212,175,55,0.18); --gold-glow:rgba(212,175,55,0.35);
+  --crimson:#8B0000; --crimson-mid:#A52A2A; --crimson-glow:rgba(139,0,0,0.5);
+  --cyan:#00F3FF; --cyan-dim:rgba(0,243,255,0.08);
+  --green:#39FF14; --red:#FF073A; --orange:#FF6B35;
+  --teal:#0d7377; --teal-dark:#095a5d; --teal-light:#14a8ad;
+  --bg:#080b10; --surface:rgba(14,18,28,0.92); --surface-hover:rgba(20,25,38,0.95);
+  --card-bg:rgba(14,18,28,0.85); --input-bg:rgba(8,11,18,0.7);
+  --txt:#ECF0F1; --txt-muted:#8a9bb0; --txt-faint:#4a5568;
+  --border:rgba(212,175,55,0.1);
+  --font:'Cairo','Tajawal',sans-serif; --font-ruqaa:'Aref Ruqaa',serif; --font-sig:'Great Vibes',cursive;
+  --r-sm:10px; --r-md:14px; --r-lg:22px; --ease:cubic-bezier(0.22,1,0.36,1);
+  --transition:0.3s ease;
+}
+
+/* ── LIGHT THEME ── */
+body.light-theme {
+  --bg:#f0f2f5; --surface:rgba(255,255,255,0.92); --surface-hover:rgba(240,242,245,0.95);
+  --card-bg:rgba(255,255,255,0.85); --input-bg:rgba(240,242,245,0.7);
+  --txt:#1a1a2e; --txt-muted:#4a5568; --txt-faint:#8a9bb0;
+  --border:rgba(0,0,0,0.1);
+}
+body.light-theme .form-card,
+body.light-theme .e-signature,
+body.light-theme .official-header {
+  background: var(--card-bg);
+}
+body.light-theme .sidebar {
+  background: #fff;
+  border-left-color: rgba(0,0,0,0.1);
+}
+body.light-theme .nav-item:hover,
+body.light-theme .nav-item.active {
+  background: rgba(212,175,55,0.1);
+}
+body.light-theme .security-badge,
+body.light-theme .version-badge {
+  background: rgba(255,255,255,0.85);
+  color: var(--txt);
+  border-color: rgba(0,0,0,0.1);
+}
+body.light-theme .user-card {
+  background: rgba(0,0,0,0.05);
+}
+body.light-theme .footer-bar {
+  background: rgba(0,0,0,0.05);
+  color: var(--txt-muted);
+}
+body.light-theme .toast {
+  background: rgba(255,255,255,0.95);
+  color: var(--txt);
+}
+body.light-theme .field-input,
+body.light-theme .field-select,
+body.light-theme .field-textarea {
+  background: rgba(240,242,245,0.7);
+}
+body.light-theme .field-input:focus,
+body.light-theme .field-select:focus,
+body.light-theme .field-textarea:focus {
+  background: rgba(255,255,255,0.9);
+}
+body.light-theme .grid-overlay {
+  background-image: linear-gradient(rgba(0,0,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.03) 1px,transparent 1px);
+}
+body.light-theme .sig-stamp {
+  background: rgba(255,255,255,0.95);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background var(--transition),color var(--transition)}
+
+#bgCanvas{position:fixed;inset:0;z-index:0;opacity:0.5}
+.grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(212,175,55,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none}
+.scanlines{position:fixed;inset:0;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;animation:scanMove 8s linear infinite}
+@keyframes scanMove{from{background-position:0 0}to{background-position:0 100px}}
+
+.toast-region{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10001;display:flex;flex-direction:column;gap:8px;width:min(90vw,380px);pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--r-md);font-size:0.82rem;font-weight:700;pointer-events:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:toastIn 0.4s var(--ease);backdrop-filter:blur(12px);line-height:1.4}
+.toast.is-out{animation:toastOut 0.3s ease forwards}
+.toast.success{background:rgba(57,255,20,0.1);border:1px solid rgba(57,255,20,0.3);color:var(--green)}
+.toast.error{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red)}
+.toast.warning{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(0.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
+
+.security-badge{position:fixed;top:16px;left:16px;z-index:1000;display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid rgba(57,255,20,0.25);border-radius:100px;font-size:11px;font-weight:700;color:var(--green);backdrop-filter:blur(12px)}
+.security-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.version-badge{position:fixed;top:16px;right:16px;z-index:1000;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid var(--gold-dim);border-radius:100px;font-size:10px;font-weight:700;color:var(--gold);backdrop-filter:blur(12px)}
+
+.official-header{text-align:center;padding:28px 16px 20px;position:relative;z-index:1;background:linear-gradient(180deg,rgba(139,0,0,0.12),transparent 60%);transition:background var(--transition)}
+.emblem-ring{position:relative;width:80px;height:80px;margin:0 auto 14px}
+.emblem-ring svg.ring-svg{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);animation:spinRing 12s linear infinite}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+.emblem-inner{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,0.15),rgba(139,0,0,0.1));border:2px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 0 30px rgba(212,175,55,0.15),inset 0 0 20px rgba(212,175,55,0.05)}
+.emblem-inner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,0.08),transparent 60%);border-radius:50%}
+.emblem-inner img{width:55px;height:55px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));animation:floatY 4s ease-in-out infinite;position:relative;z-index:1}
+.emblem-fallback{display:none;color:var(--gold);font-size:1.3rem;font-weight:900;position:relative;z-index:1}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.heart-wrap{position:relative;width:90px;height:90px;margin:10px auto;display:flex;align-items:center;justify-content:center}
+.heart-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35));animation:heartPulse 1.2s ease-in-out infinite}
+.heart-fallback{display:none;font-size:44px;color:#e60023;animation:heartPulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35))}
+@keyframes heartPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.12)}40%{transform:scale(1)}60%{transform:scale(1.08)}}
+
+.header-title{font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 24px rgba(212,175,55,0.4);line-height:1.2}
+.header-sub{font-size:0.85rem;font-weight:700;color:rgba(212,175,55,0.75);margin-top:4px}
+.header-office{font-size:0.7rem;font-weight:500;color:var(--txt-muted);margin-top:4px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.5}
+.header-divider{display:flex;align-items:center;gap:8px;margin:12px auto 0;max-width:260px}
+.header-divider span{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--gold-dim),transparent)}
+.header-divider i{color:var(--gold);font-size:9px;opacity:0.6}
+.yemen-flag-chip{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+.yemen-flag-sm{display:flex;flex-direction:column;width:24px;height:16px;border-radius:3px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.yemen-flag-sm span{height:5.33px}
+.yemen-flag-sm .red{background:#ce1126}
+.yemen-flag-sm .white{background:#fff}
+.yemen-flag-sm .black{background:#000}
+.flag-label{font-size:10px;color:var(--txt-muted);font-weight:600;letter-spacing:0.5px}
+
+.sidebar{position:fixed;right:0;top:0;width:260px;height:100vh;background:linear-gradient(180deg,#0a0e16 0%,rgba(14,18,28,0.98) 100%);border-left:1px solid var(--border);color:var(--txt);padding:20px 0;z-index:150;transition:transform 0.35s var(--ease),background var(--transition);overflow-y:auto;backdrop-filter:blur(20px);box-shadow:-8px 0 32px rgba(0,0,0,0.3)}
+.sidebar-header{padding:0 20px 16px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:10px}
+.sidebar-header h2{font-size:15px;display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:800}
+.sidebar-header .theme-toggle{background:transparent;border:none;color:var(--gold);font-size:16px;cursor:pointer;padding:6px;border-radius:50%;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;margin-top:6px}
+.sidebar-header .theme-toggle:hover{background:rgba(212,175,55,0.1)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:var(--txt-muted);text-decoration:none;font-size:13px;transition:all 0.25s var(--ease);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;font-weight:600;position:relative;border-right:3px solid transparent}
+.nav-item:hover,.nav-item.active{background:rgba(212,175,55,0.06);color:var(--gold)}
+.nav-item.active{border-right-color:var(--gold)}
+.nav-item i{width:20px;text-align:center;font-size:14px}
+.user-card{position:absolute;bottom:0;left:0;right:0;padding:14px 20px;background:rgba(0,0,0,0.25);border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.user-avatar{width:38px;height:38px;background:linear-gradient(135deg,var(--crimson),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:700;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-info .name{font-weight:700;font-size:12px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info .role{font-size:10px;color:var(--txt-muted);margin-top:1px}
+.logout-btn{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:10px;font-weight:700;transition:all 0.2s;font-family:inherit;flex-shrink:0}
+.logout-btn:hover{background:rgba(255,7,58,0.2)}
+
+.main-content{margin-right:260px;padding:20px 28px;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;position:relative;z-index:1}
+.back-btn{background:var(--card-bg);border:1px solid var(--border);width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;text-decoration:none;color:var(--gold);transition:all 0.2s;flex-shrink:0}
+.back-btn:hover{background:rgba(212,175,55,0.08);border-color:var(--gold);transform:translateX(-2px)}
+.page-header h1{font-size:1.1rem;color:var(--gold);font-weight:800}
+
+.form-card{background:var(--card-bg);border-radius:var(--r-lg);padding:28px;border:1px solid var(--border);max-width:700px;margin:0 auto;width:100%;backdrop-filter:blur(10px);position:relative;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.03);transition:background var(--transition)}
+.form-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--r-lg);padding:1px;background:conic-gradient(from var(--angle,0deg),transparent 0%,var(--gold) 8%,transparent 16%,transparent 50%,var(--cyan) 58%,transparent 66%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 6s linear infinite;opacity:0.35;z-index:0}
+@property --angle{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes rotateBorder{to{--angle:360deg}}
+.form-card::after{content:'';position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(circle at top right,rgba(212,175,55,0.05),transparent 70%);border-radius:0 var(--r-lg) 0 0;pointer-events:none}
+
+.alert{padding:12px 16px;border-radius:var(--r-md);font-size:13px;margin-bottom:18px;display:none;font-weight:700;position:relative;overflow:hidden;animation:slideDown 0.4s var(--ease);z-index:1}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.alert.error{background:rgba(255,7,58,0.08);color:var(--red);border:1px solid rgba(255,7,58,0.2);display:block}
+.alert.success{background:rgba(57,255,20,0.06);color:var(--green);border:1px solid rgba(57,255,20,0.2);display:block}
+
+.field-wrap{position:relative;margin-bottom:20px;z-index:1}
+.field-input,.field-select,.field-textarea{width:100%;padding:18px 16px 7px;background:var(--input-bg);border:1.5px solid rgba(212,175,55,0.15);border-radius:var(--r-md);color:var(--txt);font-family:var(--font);font-size:0.9rem;font-weight:500;outline:none;transition:all 0.3s ease;-webkit-appearance:none;appearance:none}
+.field-input:hover:not(:focus),.field-select:hover:not(:focus),.field-textarea:hover:not(:focus){border-color:rgba(212,175,55,0.28)}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--gold);background:rgba(12,16,26,0.9);box-shadow:0 0 0 3px rgba(212,175,55,0.08),0 4px 20px rgba(212,175,55,0.06)}
+.field-input::placeholder,.field-textarea::placeholder{color:transparent}
+.field-select option{background:#080b10;color:var(--txt)}
+.field-label{position:absolute;top:13px;right:14px;font-size:0.82rem;font-weight:600;color:var(--txt-muted);pointer-events:none;transition:all 0.25s var(--ease);display:flex;align-items:center;gap:6px;transform-origin:right center}
+.field-label i{font-size:0.75rem;color:var(--gold);opacity:0.7;transition:opacity 0.25s}
+.field-input:focus+.field-label,.field-input:not(:placeholder-shown)+.field-label,.field-select:focus+.field-label,.field-select:valid+.field-label,.field-textarea:focus+.field-label,.field-textarea:not(:placeholder-shown)+.field-label{top:5px;font-size:0.65rem;color:var(--gold);letter-spacing:0.3px}
+.field-input:focus+.field-label i,.field-select:focus+.field-label i,.field-textarea:focus+.field-label i{opacity:1}
+.field-line{position:absolute;bottom:0;right:0;height:2px;width:0%;background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:0 0 var(--r-md) var(--r-md);transition:width 0.35s var(--ease)}
+.field-input:focus~.field-line,.field-select:focus~.field-line,.field-textarea:focus~.field-line{width:100%}
+.field-textarea{min-height:130px;resize:vertical;padding-top:22px}
+.required{color:var(--red);font-weight:700}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── ATTACHMENT UPLOAD ── */
+.upload-area{border:2px dashed rgba(212,175,55,0.2);border-radius:var(--r-md);padding:18px;text-align:center;cursor:pointer;transition:all 0.3s ease;position:relative;z-index:1;background:rgba(8,11,18,0.3);margin-bottom:20px}
+.upload-area:hover,.upload-area.drag-over{border-color:var(--gold);background:rgba(212,175,55,0.04)}
+.upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;width:100%;height:100%}
+.upload-icon{font-size:28px;color:var(--gold);opacity:0.5;display:block;margin-bottom:6px}
+.upload-text{font-size:13px;color:var(--txt-muted)}
+.upload-text .highlight{color:var(--gold);font-weight:700}
+.upload-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.upload-preview .preview-item{background:rgba(8,11,18,0.6);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt-muted);animation:fadeUp 0.3s ease}
+.upload-preview .preview-item i{color:var(--gold);font-size:14px}
+.upload-preview .preview-item .remove-file{color:var(--red);cursor:pointer;font-size:13px;margin-right:4px;transition:all 0.2s}
+.upload-preview .preview-item .remove-file:hover{transform:scale(1.2)}
+
+.btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,#7a0000 0%,var(--crimson) 40%,var(--crimson-mid) 100%);border:1px solid rgba(212,175,55,0.3);border-radius:var(--r-md);color:#F8E8C0;font-family:var(--font);font-size:0.95rem;font-weight:800;cursor:pointer;position:relative;overflow:hidden;transition:all 0.2s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px;z-index:1;letter-spacing:0.3px}
+.btn-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);opacity:0;transition:opacity 0.3s}
+.btn-submit:hover:not(:disabled)::before{opacity:1}
+.btn-submit:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 12px 35px var(--crimson-glow),0 0 20px rgba(212,175,55,0.2),0 0 0 1px rgba(212,175,55,0.4);border-color:var(--gold)}
+.btn-submit:active:not(:disabled){transform:translateY(0) scale(0.99)}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed}
+.btn-submit .spinner{display:none}
+.btn-submit.is-loading .btn-text{display:none}
+.btn-submit.is-loading .spinner{display:inline-block}
+
+.e-signature{margin:20px auto 0;padding:18px;background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);text-align:center;backdrop-filter:blur(10px);max-width:700px;width:100%;transition:background var(--transition)}
+.sig-label{font-size:9px;color:var(--txt-faint);margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.sig-label .verify-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(57,255,20,0.15);animation:blink 2s ease-in-out infinite}
+.sig-canvas-wrapper{position:relative;display:inline-block;width:240px;max-width:100%}
+.sig-svg{width:100%;height:75px;overflow:visible}
+.sig-stroke{fill:none;stroke:var(--gold);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:580;stroke-dashoffset:580;animation:sig-draw 2.6s cubic-bezier(0.65,0,0.35,1) 0.3s infinite}
+@keyframes sig-draw{0%{stroke-dashoffset:580;opacity:0.9}55%{stroke-dashoffset:0;opacity:1}80%{stroke-dashoffset:0;opacity:1}92%{opacity:0}100%{stroke-dashoffset:580;opacity:0}}
+.sig-nib{r:3.5;fill:var(--gold);stroke:#fff;stroke-width:1.3;offset-path:path('M8,52 C20,16 32,80 46,46 C56,20 66,70 80,42 C90,22 100,60 112,40 C124,22 136,54 148,38 C158,22 170,52 182,36 C192,22 202,48 216,36 C224,26 234,44 246,34');offset-rotate:0deg;animation:sig-move 2.6s cubic-bezier(0.65,0,0.35,1) 0.3s infinite}
+@keyframes sig-move{0%{offset-distance:0%;opacity:1}55%{offset-distance:100%;opacity:1}80%{offset-distance:100%;opacity:1}92%{opacity:0}100%{offset-distance:100%;opacity:0}}
+.sig-name{font-family:var(--font-sig);font-size:22px;font-weight:400;color:var(--gold);letter-spacing:0.5px;opacity:0;animation:sig-name-reveal 2.6s ease 0.3s infinite}
+@keyframes sig-name-reveal{0%,50%{opacity:0;transform:translateY(4px)}62%{opacity:1;transform:translateY(0)}88%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(0)}}
+.sig-line{width:85%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);margin:3px auto 0;border-radius:2px;opacity:0;animation:sig-line-fade 2.6s ease 0.3s infinite}
+@keyframes sig-line-fade{0%,58%{opacity:0}65%{opacity:1}88%{opacity:1}100%{opacity:0}}
+.sig-stamp{position:absolute;top:-3px;left:-3px;width:36px;height:36px;border:2px solid var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:6.5px;line-height:1.2;color:var(--red);font-weight:800;background:rgba(255,255,255,0.92);box-shadow:0 2px 8px rgba(231,76,60,0.18);opacity:0;transform:rotate(-15deg) scale(0.7);animation:stamp-pulse 2.6s cubic-bezier(0.34,1.56,0.64,1) 0.3s infinite}
+@keyframes stamp-pulse{0%,60%{opacity:0;transform:rotate(-15deg) scale(0.6)}72%{opacity:0.9;transform:rotate(-15deg) scale(1.08)}80%{transform:rotate(-15deg) scale(1)}88%{opacity:0.9}100%{opacity:0;transform:rotate(-15deg) scale(1)}}
+.sig-title{font-size:10px;color:var(--txt-muted);margin-top:6px;font-weight:600}
+
+.footer-bar{width:100%;margin-top:auto;padding:14px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));color:var(--txt-faint);font-size:10px;font-weight:600;letter-spacing:0.3px;border-top:1px solid var(--border);border-radius:var(--r-md);transition:background var(--transition)}
+.mobile-toggle{display:none;position:fixed;top:16px;right:16px;z-index:160;background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;border:none;width:42px;height:42px;border-radius:var(--r-sm);font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid rgba(212,175,55,0.2);transition:all 0.2s ease;align-items:center;justify-content:center}
+.mobile-toggle:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--crimson-glow)}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(100%);top:0;height:100vh}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-right:0;padding:16px}
+  .mobile-toggle{display:flex}
+  .form-row{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .official-header{padding:20px 12px 16px}
+  .emblem-ring{width:64px;height:64px}
+  .emblem-inner{width:64px;height:64px}
+  .emblem-inner img{width:44px;height:44px}
+  .heart-wrap{width:70px;height:70px}
+  .header-title{font-size:1.1rem}
+  .form-card{padding:20px 16px}
+  .security-badge,.version-badge{display:none}
+  .upload-area{padding:12px}
+  .upload-text{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .sig-stroke,.sig-nib,.sig-name,.sig-line,.sig-stamp{animation:none!important}
+  .sig-stroke{stroke-dashoffset:0;opacity:1}
+  .sig-nib{display:none}
+  .sig-name,.sig-line,.sig-stamp{opacity:1;transform:none}
+  .ring-svg{animation:none}
+  .emblem-inner img,.heart-wrap img{animation:none}
+  .scanlines{animation:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="toast-region" id="toastRegion" role="log" aria-live="polite" aria-atomic="false"></div>
+<div class="security-badge" role="status"><i class="fas fa-shield-alt" style="margin-left:4px"></i>اتصال آمن · TLS 1.3</div>
+<div class="version-badge">نظام الشكاوى · v2.0 · 2026</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="القائمة"><i class="fas fa-bars"></i></button>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2 style="display:flex;justify-content:space-between;align-items:center;">
+      <span><i class="fas fa-heart-pulse" style="color:var(--red)"></i> مركز القلب</span>
+      <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري">
+        <i class="fas fa-moon" id="themeIcon"></i>
+      </button>
+    </h2>
+  </div>
+  <nav>
+    <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+    <a href="new-complaint.html" class="nav-item active"><i class="fas fa-plus-circle"></i> شكوى جديدة</a>
+  </nav>
+  <div class="user-card">
+    <div class="user-avatar" id="userAvatar">👤</div>
+    <div class="user-info">
+      <div class="name" id="userName">--</div>
+      <div class="role" id="userRole">--</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">خروج</button>
+  </div>
+</aside>
+
+<main class="main-content">
+  <header class="official-header">
+    <div class="emblem-ring">
+      <svg class="ring-svg" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="52" cy="52" r="48" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="6 4" stroke-linecap="round"/>
+        <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="104" y2="104" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#D4AF37" stop-opacity="0.8"/><stop offset="50%" stop-color="#00F3FF" stop-opacity="0.3"/><stop offset="100%" stop-color="#D4AF37" stop-opacity="0.8"/></linearGradient></defs>
+      </svg>
+      <div class="emblem-inner">
+        <img src="images/logo.png" alt="شعار الوزارة" width="55" height="55" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="emblem-fallback" aria-hidden="true">🏥</div>
+      </div>
+    </div>
+    <h1 class="header-title">الجمهورية اليمنية</h1>
+    <p class="header-sub">وزارة الصحة والبيئة</p>
+    <p class="header-office">هيئة مستشفى الثورة العام — مركز القلب والقسطرة القلبية</p>
+    <div class="heart-wrap">
+      <img src="images/heart.png" alt="مركز القلب" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div class="heart-fallback" aria-hidden="true">❤️</div>
+    </div>
+    <div class="header-divider" aria-hidden="true"><span></span><i class="fas fa-star"></i><i class="fas fa-circle" style="font-size:5px"></i><i class="fas fa-star"></i><span></span></div>
+    <div class="yemen-flag-chip">
+      <div class="yemen-flag-sm"><span class="red"></span><span class="white"></span><span class="black"></span></div>
+      <span class="flag-label">اليمن</span>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <a href="dashboard.html" class="back-btn" aria-label="رجوع"><i class="fas fa-arrow-right"></i></a>
+    <h1><i class="fas fa-plus-circle" style="color:var(--gold);margin-left:8px"></i>تقديم شكوى جديدة</h1>
+  </div>
+
+  <div class="form-card">
+    <div id="alertBox" class="alert"></div>
+    <form id="complaintForm" novalidate>
+      <div class="form-row">
+        <div class="field-wrap">
+          <input type="text" class="field-input" id="submitterName" required placeholder="name" autocomplete="name">
+          <label class="field-label" for="submitterName"><i class="fas fa-user" aria-hidden="true"></i>الاسم الكامل <span class="required">*</span></label>
+          <div class="field-line" aria-hidden="true"></div>
+        </div>
+        <div class="field-wrap">
+          <input type="email" class="field-input" id="submitterEmail" required placeholder="email" autocomplete="email">
+          <label class="field-label" for="submitterEmail"><i class="fas fa-envelope" aria-hidden="true"></i>البريد الإلكتروني <span class="required">*</span></label>
+          <div class="field-line" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <input type="text" class="field-input" id="title" required placeholder="title" autocomplete="off">
+        <label class="field-label" for="title"><i class="fas fa-heading" aria-hidden="true"></i>عنوان الشكوى <span class="required">*</span></label>
+        <div class="field-line" aria-hidden="true"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-wrap">
+          <select class="field-select" id="category" required>
+            <option value="" disabled selected></option>
+            <option value="مواعيد">مواعيد</option>
+            <option value="نظافة">نظافة</option>
+            <option value="تقنية">تقنية</option>
+            <option value="خدمة العملاء">خدمة العملاء</option>
+            <option value="طبية">طبية</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+          <label class="field-label" for="category"><i class="fas fa-folder" aria-hidden="true"></i>الفئة <span class="required">*</span></label>
+          <div class="field-line" aria-hidden="true"></div>
+        </div>
+        <div class="field-wrap">
+          <select class="field-select" id="priority" required>
+            <option value="" disabled selected></option>
+            <option value="high">عالية</option>
+            <option value="medium">متوسطة</option>
+            <option value="low">منخفضة</option>
+          </select>
+          <label class="field-label" for="priority"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>مستوى الأولوية <span class="required">*</span></label>
+          <div class="field-line" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <textarea class="field-textarea" id="description" required placeholder="description" autocomplete="off"></textarea>
+        <label class="field-label" for="description"><i class="fas fa-align-left" aria-hidden="true"></i>تفاصيل الشكوى <span class="required">*</span></label>
+        <div class="field-line" aria-hidden="true"></div>
+      </div>
+
+      <!-- ── ATTACHMENT UPLOAD ── -->
+      <div class="upload-area" id="uploadArea">
+        <i class="fas fa-cloud-upload-alt upload-icon" aria-hidden="true"></i>
+        <div class="upload-text">
+          <span class="highlight">اضغط هنا لرفع المرفقات</span> أو اسحب الملفات إلى هذه المنطقة<br>
+          <small style="color:var(--txt-faint)">الحد الأقصى: 5 ملفات، 2 ميجابايت لكل ملف</small>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+        <div class="upload-preview" id="uploadPreview"></div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        <span class="btn-text">إرسال الشكوى</span>
+        <i class="fas fa-circle-notch fa-spin spinner" aria-hidden="true"></i>
+      </button>
+    </form>
+  </div>
+
+  <div class="e-signature">
+    <div class="sig-label"><span class="verify-dot"></span>توقيع إلكتروني معتمد</div>
+    <div class="sig-canvas-wrapper">
+      <svg class="sig-svg" viewBox="0 0 260 90" xmlns="http://www.w3.org/2000/svg">
+        <path class="sig-stroke" d="M8,52 C20,16 32,80 46,46 C56,20 66,70 80,42 C90,22 100,60 112,40 C124,22 136,54 148,38 C158,22 170,52 182,36 C192,22 202,48 216,36 C224,26 234,44 246,34"/>
+        <circle class="sig-nib"></circle>
+      </svg>
+      <div class="sig-name">Dr. Salah Al-Ahdal</div>
+      <div class="sig-line"></div>
+      <div class="sig-stamp">معتمد<br>رقمياً</div>
+    </div>
+    <div class="sig-title">هندسة وتطوير البرمجيات الطبية</div>
+  </div>
+
+  <div class="footer-bar" style="margin-top:20px">
+    © 2026 وزارة الصحة والبيئة — هيئة مستشفى الثورة العام | جميع الحقوق محفوظة
+  </div>
+</main>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+
+(function initCanvas(){
+  const canvas=$('bgCanvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,nodes=[];
+  const GOLD='rgba(212,175,55,';
+  const CYAN='rgba(0,243,255,';
+  const RED='rgba(139,0,0,';
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+  function buildNodes(n){nodes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35,r:Math.random()*1.8+0.5,color:Math.random()<0.6?GOLD:Math.random()<0.5?CYAN:RED,alpha:Math.random()*0.5+0.2}))}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          const a=(1-dist/130)*0.12;
+          ctx.beginPath();
+          ctx.strokeStyle=`${nodes[i].color}${a})`;
+          ctx.lineWidth=0.6;
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n=>{
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=`${n.color}${n.alpha})`;
+      ctx.fill();
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1;
+      if(n.y<0||n.y>H)n.vy*=-1;
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize();buildNodes(70)});
+  resize();buildNodes(70);draw();
+})();
+
+const ICONS={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+function toast(msg,type='info',ms=4000){
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.setAttribute('role','status');
+  t.innerHTML=`<i class="fas ${ICONS[type]||ICONS.info}" aria-hidden="true"></i><span>${msg}</span>`;
+  $('toastRegion').appendChild(t);
+  setTimeout(()=>{
+    t.classList.add('is-out');
+    t.addEventListener('animationend',()=>t.remove(),{once:true});
+  },ms);
+}
+
+/* ── THEME ── */
+function toggleTheme(){
+  document.body.classList.toggle('light-theme');
+  const isLight=document.body.classList.contains('light-theme');
+  localStorage.setItem('hc_theme',isLight?'light':'dark');
+  document.getElementById('themeIcon').className=isLight?'fas fa-sun':'fas fa-moon';
+}
+if(localStorage.getItem('hc_theme')==='light'){
+  document.body.classList.add('light-theme');
+  document.getElementById('themeIcon').className='fas fa-sun';
+}
+
+/* ── AUTH ── */
+const user=JSON.parse(localStorage.getItem('hc_currentUser'));
+if(!user){
+  window.location.href='index.html';
+}else{
+  $('userName').textContent=user.name;
+  const roles={admin:'مدير النظام',doctor:'طبيب',nurse:'ممرض',patient:'مريض'};
+  $('userRole').textContent=roles[user.role]||user.role;
+  $('userAvatar').textContent=user.name.charAt(0);
+  $('submitterName').value=user.name||'';
+  $('submitterEmail').value=user.email||'';
+}
+
+function logout(){
+  localStorage.removeItem('hc_currentUser');
+  sessionStorage.removeItem('hc_session');
+  window.location.href='index.html';
+}
+function toggleSidebar(){
+  $('sidebar').classList.toggle('open');
+}
+
+/* ── ALERT ── */
+const alertBox=$('alertBox');
+function showAlert(msg,type){
+  alertBox.className=`alert ${type}`;
+  alertBox.textContent=msg;
+}
+function clearAlert(){
+  alertBox.className='alert';
+  alertBox.textContent='';
+}
+
+/* ── ATTACHMENTS ── */
+let attachments=[];
+const MAX_FILES=5;
+const MAX_FILE_SIZE=2*1024*1024; // 2MB
+
+function formatFileSize(bytes){
+  if(bytes<1024) return bytes+' B';
+  if(bytes<1048576) return (bytes/1024).toFixed(1)+' KB';
+  return (bytes/1048576).toFixed(1)+' MB';
+}
+
+function renderAttachments(){
+  const preview=$('uploadPreview');
+  preview.innerHTML=attachments.map((f,i)=>`
+    <div class="preview-item">
+      <i class="fas ${f.type.startsWith('image/')?'fa-file-image':f.type==='application/pdf'?'fa-file-pdf':'fa-file-alt'}"></i>
+      <span>${f.name}</span>
+      <span style="font-size:10px;color:var(--txt-faint)">(${formatFileSize(f.size)})</span>
+      <span class="remove-file" onclick="removeAttachment(${i})">&times;</span>
+    </div>
+  `).join('');
+}
+
+function removeAttachment(index){
+  attachments.splice(index,1);
+  renderAttachments();
+  // إعادة تعيين حقل الملفات
+  const input=$('fileInput');
+  input.value='';
+}
+
+// معالج رفع الملفات
+$('fileInput').addEventListener('change',function(e){
+  const files=Array.from(this.files);
+  const newFiles=[];
+  let error=false;
+
+  for(const file of files){
+    if(attachments.length+newFiles.length>=MAX_FILES){
+      toast(`الحد الأقصى ${MAX_FILES} ملفات فقط`,'warning',2500);
+      break;
+    }
+    if(file.size>MAX_FILE_SIZE){
+      toast(`الملف ${file.name} يتجاوز الحد الأقصى 2 ميجابايت`,'error',2500);
+      error=true;
+      continue;
+    }
+    newFiles.push(file);
+  }
+
+  if(error) return;
+  attachments.push(...newFiles);
+  renderAttachments();
+  this.value='';
+});
+
+// سحب وإفلات
+const uploadArea=$('uploadArea');
+uploadArea.addEventListener('dragover',(e)=>{
+  e.preventDefault();
+  uploadArea.classList.add('drag-over');
+});
+uploadArea.addEventListener('dragleave',()=>{
+  uploadArea.classList.remove('drag-over');
+});
+uploadArea.addEventListener('drop',(e)=>{
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  const files=Array.from(e.dataTransfer.files);
+  const event={target:{files}};
+  $('fileInput').files=e.dataTransfer.files;
+  $('fileInput').dispatchEvent(new Event('change'));
+});
+
+/* ── FORM SUBMISSION ── */
+const submitBtn=$('submitBtn');
+function setLoading(on){
+  submitBtn.disabled=on;
+  submitBtn.classList.toggle('is-loading',on);
+}
+
+function getFileAsBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const form=$('complaintForm');
+form.addEventListener('submit',async function(e){
+  e.preventDefault();
+  clearAlert();
+
+  const title=$('title').value.trim();
+  const category=$('category').value;
+  const priority=$('priority').value;
+  const description=$('description').value.trim();
+  const submitter=$('submitterName').value.trim();
+  const email=$('submitterEmail').value.trim();
+
+  if(!title||!category||!priority||!description||!submitter||!email){
+    showAlert('⚠️ يرجى تعبئة جميع الحقول المطلوبة','error');
+    toast('يرجى تعبئة جميع الحقول المطلوبة','warning',2500);
+    return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showAlert('⚠️ يرجى إدخال بريد إلكتروني صحيح','error');
+    toast('البريد الإلكتروني غير صالح','error',2500);
+    return;
+  }
+
+  setLoading(true);
+
+  try{
+    // تحويل المرفقات إلى Base64
+    const attachmentData=await Promise.all(attachments.map(async(file)=>({
+      name:file.name,
+      size:file.size,
+      type:file.type,
+      data:await getFileAsBase64(file)
+    })));
+
+    const complaint={
+      id:Date.now(),
+      title,
+      category,
+      priority,
+      status:'pending',
+      date:new Date().toISOString().split('T')[0],
+      submitter,
+      email,
+      description,
+      attachments:attachmentData,
+      replies:[]
+    };
+
+    const complaints=JSON.parse(localStorage.getItem('hc_complaints')||'[]');
+    complaints.push(complaint);
+    localStorage.setItem('hc_complaints',JSON.stringify(complaints));
+
+    // إرسال إشعار عبر BroadcastChannel
+    try{
+      const bc=new BroadcastChannel('complaints_channel');
+      bc.postMessage({type:'new_complaint', title, id:complaint.id});
+      bc.close();
+    }catch(e){}
+
+    showAlert('✅ تم إرسال الشكوى بنجاح! سيتم مراجعتها في أقرب وقت.','success');
+    toast('تم إرسال الشكوى بنجاح!','success',3000);
+
+    form.reset();
+    $('submitterName').value=user.name||'';
+    $('submitterEmail').value=user.email||'';
+    attachments=[];
+    renderAttachments();
+    setLoading(false);
+
+    // إضافة إشعار في sessionStorage ليظهر في لوحة التحكم
+    sessionStorage.setItem('hc_justAdded','true');
+
+    setTimeout(()=>{
+      window.location.href='dashboard.html';
+    },1500);
+  }catch(err){
+    console.error(err);
+    showAlert('❌ حدث خطأ أثناء إرسال الشكوى. يرجى المحاولة مرة أخرى.','error');
+    toast('فشل إرسال الشكوى','error',2500);
+    setLoading(false);
+  }
+});
+
+/* ── CLOSE SIDEBAR ── */
+document.addEventListener('click',function(e){
+  const sidebar=$('sidebar');
+  const toggle=document.querySelector('.mobile-toggle');
+  if(window.innerWidth<=900&&sidebar.classList.contains('open')){
+    if(!sidebar.contains(e.target)&&!toggle.contains(e.target)){
+      sidebar.classList.remove('open');
+    }
+  }
+});
+
+console.log('%c💎 New Complaint — v2.0 (مع المرفقات والإشعارات)','color:#D4AF37;font-size:14px;font-weight:900;');
+})();
+</script>
+</body>
+</html>

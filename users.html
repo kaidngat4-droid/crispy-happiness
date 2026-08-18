@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#8B0000">
+<meta name="description" content="إدارة المستخدمين - نظام الشكاوى الإلكتروني - مركز القلب والقسطرة القلبية">
+<title>إدارة المستخدمين | نظام الشكاوى | مركز القلب</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root {
+  --gold:#D4AF37; --gold-light:#F0D060; --gold-dim:rgba(212,175,55,0.18); --gold-glow:rgba(212,175,55,0.35);
+  --crimson:#8B0000; --crimson-mid:#A52A2A; --crimson-glow:rgba(139,0,0,0.5);
+  --cyan:#00F3FF; --cyan-dim:rgba(0,243,255,0.08);
+  --green:#39FF14; --red:#FF073A; --orange:#FF6B35;
+  --teal:#0d7377; --purple:#9b59b6; --blue:#3498db;
+  --bg:#080b10; --surface:rgba(14,18,28,0.92); --surface-hover:rgba(20,25,38,0.95);
+  --card-bg:rgba(14,18,28,0.85); --input-bg:rgba(8,11,18,0.7);
+  --txt:#ECF0F1; --txt-muted:#8a9bb0; --txt-faint:#4a5568;
+  --border:rgba(212,175,55,0.1);
+  --font:'Cairo','Tajawal',sans-serif; --font-ruqaa:'Aref Ruqaa',serif; --font-sig:'Great Vibes',cursive;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --transition:0.3s ease;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+}
+body.light-theme {
+  --bg:#f0f2f5; --surface:rgba(255,255,255,0.92); --surface-hover:rgba(240,242,245,0.95);
+  --card-bg:rgba(255,255,255,0.85); --input-bg:rgba(240,242,245,0.7);
+  --txt:#1a1a2e; --txt-muted:#4a5568; --txt-faint:#8a9bb0;
+  --border:rgba(0,0,0,0.1);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.1);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.15);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background var(--transition),color var(--transition)}
+#bgCanvas{position:fixed;inset:0;z-index:0;opacity:0.4}
+.grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(212,175,55,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none}
+
+.toast-region{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10001;display:flex;flex-direction:column;gap:8px;width:min(90vw,400px);pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--r-md);font-size:0.82rem;font-weight:700;pointer-events:auto;box-shadow:var(--shadow-lg);animation:toastIn 0.4s var(--ease);backdrop-filter:blur(12px);line-height:1.4;position:relative;overflow:hidden}
+.toast::before{content:'';position:absolute;bottom:0;right:0;height:3px;background:currentColor;animation:toastTimer linear forwards}
+.toast.is-out{animation:toastOut 0.3s ease forwards}
+.toast.success{background:rgba(57,255,20,0.1);border:1px solid rgba(57,255,20,0.3);color:var(--green)}
+.toast.error{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red)}
+.toast.warning{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.toast.info{background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.3);color:var(--cyan)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(0.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
+@keyframes toastTimer{from{width:100%}to{width:0%}}
+
+.security-badge{position:fixed;top:16px;left:16px;z-index:1000;display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid rgba(57,255,20,0.25);border-radius:100px;font-size:11px;font-weight:700;color:var(--green);backdrop-filter:blur(12px)}
+.security-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.version-badge{position:fixed;top:16px;right:296px;z-index:1000;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid var(--gold-dim);border-radius:100px;font-size:10px;font-weight:700;color:var(--gold);backdrop-filter:blur(12px)}
+body.light-theme .security-badge, body.light-theme .version-badge{background:rgba(255,255,255,0.9)}
+
+.sidebar{position:fixed;right:0;top:0;width:280px;height:100vh;background:linear-gradient(180deg,#0a0e16 0%,rgba(14,18,28,0.98) 100%);border-left:1px solid var(--border);color:var(--txt);padding:24px 0;z-index:200;transition:transform 0.3s ease,background var(--transition);overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,0.3);display:flex;flex-direction:column}
+.sidebar-header{padding:0 24px 20px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:16px}
+.sidebar-header h2{font-size:16px;display:flex;align-items:center;gap:10px;color:var(--gold)}
+.sidebar-section{padding:8px 0;margin-bottom:8px}
+.sidebar-section-title{font-size:10px;font-weight:700;color:var(--txt-faint);text-transform:uppercase;letter-spacing:1px;padding:0 24px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--txt-muted);text-decoration:none;font-size:13px;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;font-family:inherit;border-right:3px solid transparent;text-align:right;white-space:nowrap}
+.nav-item:hover,.nav-item.active{background:rgba(212,175,55,0.06);color:var(--gold)}
+.nav-item.active{border-right-color:var(--gold);font-weight:700}
+.nav-item i{width:20px;text-align:center;font-size:14px;flex-shrink:0}
+.user-card{margin-top:auto;padding:16px 24px;background:rgba(0,0,0,0.25);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--crimson),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-info .name{font-weight:700;font-size:13px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info .role{font-size:11px;color:var(--txt-muted)}
+.logout-btn{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all 0.2s;font-family:inherit;flex-shrink:0}
+.logout-btn:hover{background:rgba(255,7,58,0.2)}
+.theme-toggle{background:transparent;border:none;color:var(--gold);font-size:17px;cursor:pointer;padding:6px;border-radius:50%;transition:all 0.2s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin-top:8px}
+.theme-toggle:hover{background:rgba(212,175,55,0.1)}
+
+.main-content{margin-right:280px;padding:24px 28px;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+
+.official-header{text-align:center;padding:24px 16px 20px;position:relative;z-index:1;background:linear-gradient(180deg,rgba(139,0,0,0.15),transparent 60%);border-radius:var(--r-lg);margin-bottom:20px}
+.emblem-ring{position:relative;width:80px;height:80px;margin:0 auto 12px}
+.emblem-ring svg.ring-svg{position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);animation:spinRing 12s linear infinite}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+.emblem-inner{width:80px;height:80px;border-radius:50%;background:radial-gradient(135deg,rgba(212,175,55,0.15),rgba(139,0,0,0.1));border:2px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 0 30px rgba(212,175,55,0.15),inset 0 0 20px rgba(212,175,55,0.05)}
+.emblem-inner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,0.08),transparent 60%);border-radius:50%}
+.emblem-inner img{width:55px;height:55px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));animation:floatY 4s ease-in-out infinite;position:relative;z-index:1}
+.emblem-fallback{display:none;color:var(--gold);font-size:1.3rem;font-weight:900;position:relative;z-index:1}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.heart-wrap{position:relative;width:90px;height:90px;margin:8px auto;display:flex;align-items:center;justify-content:center}
+.heart-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35));animation:heartPulse 1.2s ease-in-out infinite}
+.heart-fallback{display:none;font-size:46px;color:#e60023;animation:heartPulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35))}
+@keyframes heartPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.12)}40%{transform:scale(1)}60%{transform:scale(1.08)}}
+.header-title{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 24px rgba(212,175,55,0.4);line-height:1.2}
+.header-sub{font-size:0.88rem;font-weight:700;color:rgba(212,175,55,0.75);margin-top:3px}
+.header-office{font-size:0.72rem;font-weight:500;color:var(--txt-muted);margin-top:3px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.5}
+.header-divider{display:flex;align-items:center;gap:10px;margin:12px auto 0;max-width:280px}
+.header-divider span{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--gold-dim),transparent)}
+.header-divider i{color:var(--gold);font-size:9px;opacity:0.6}
+.yemen-flag-chip{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.yemen-flag{display:flex;flex-direction:column;width:24px;height:16px;border-radius:3px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.yemen-flag span{height:5.33px}
+.yemen-flag .red{background:#ce1126}
+.yemen-flag .white{background:#fff}
+.yemen-flag .black{background:#000}
+.flag-label{font-size:9px;color:var(--txt-muted);font-weight:600;letter-spacing:0.5px}
+
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.page-header h1{font-size:22px;color:var(--gold);font-weight:800;display:flex;align-items:center;gap:10px}
+.page-header .actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:var(--r-md);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;font-family:inherit;position:relative;overflow:hidden;white-space:nowrap}
+.btn:active{transform:scale(0.97)}
+.btn-add{background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;box-shadow:0 4px 16px rgba(139,0,0,0.3);border:1px solid rgba(212,175,55,0.2)}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(139,0,0,0.4);border-color:var(--gold)}
+.btn-refresh{background:rgba(0,243,255,0.12);color:var(--cyan);border:1px solid rgba(0,243,255,0.2)}
+.btn-refresh:hover{background:rgba(0,243,255,0.2);transform:translateY(-2px)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none !important}
+
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{flex:1;min-width:250px;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-md);color:var(--txt);font-family:inherit;font-size:13px;outline:none;transition:all 0.2s}
+.search-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,0.06)}
+.search-input::placeholder{color:var(--txt-faint)}
+.filter-select{padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-md);color:var(--txt);font-family:inherit;font-size:13px;outline:none;min-width:140px}
+
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+.quick-action{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);text-decoration:none;color:var(--txt-muted);transition:all 0.25s;cursor:pointer;position:relative;overflow:hidden}
+.quick-action::before{content:'';position:absolute;top:0;right:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity 0.3s}
+.quick-action:hover{border-color:rgba(212,175,55,0.3);color:var(--gold);transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.quick-action:hover::before{opacity:1}
+.quick-action i{font-size:22px;color:var(--gold);opacity:0.8;transition:all 0.3s}
+.quick-action:hover i{opacity:1;transform:scale(1.15)}
+.quick-action .qa-label{font-size:10px;font-weight:700;text-align:center;line-height:1.3}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card-bg);border-radius:var(--r-md);padding:16px;border:1px solid var(--border);position:relative;overflow:hidden;backdrop-filter:blur(10px);transition:all 0.25s;cursor:pointer}
+.stat-card:hover{border-color:rgba(212,175,55,0.25);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%}
+.stat-card.total::before{background:var(--gold)}
+.stat-card.active::before{background:var(--green)}
+.stat-card.admins::before{background:var(--red)}
+.stat-card.doctors::before{background:var(--cyan)}
+.stat-label{color:var(--txt-muted);font-size:10px;margin-bottom:5px;font-weight:600;display:flex;align-items:center;gap:5px}
+.stat-value{font-size:22px;font-weight:800;color:var(--txt)}
+.stat-icon{position:absolute;top:12px;left:12px;font-size:18px;opacity:0.12}
+
+.table-card{background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);overflow-x:auto;flex:1;backdrop-filter:blur(10px);position:relative;min-height:300px}
+.users-table{width:100%;border-collapse:collapse;min-width:800px}
+.users-table th{background:rgba(212,175,55,0.04);padding:12px 14px;text-align:right;font-size:11px;font-weight:700;color:var(--txt-muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+.users-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--txt-muted);vertical-align:middle;transition:background 0.2s}
+.users-table tr:hover{background:rgba(212,175,55,0.03)}
+.users-table tr:last-child td{border-bottom:none}
+.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.role-admin{background:rgba(255,7,58,0.1);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+.role-doctor{background:rgba(0,243,255,0.08);color:var(--cyan);border:1px solid rgba(0,243,255,0.2)}
+.role-nurse{background:rgba(255,107,53,0.1);color:var(--orange);border:1px solid rgba(255,107,53,0.2)}
+.role-patient{background:rgba(57,255,20,0.08);color:var(--green);border:1px solid rgba(57,255,20,0.2)}
+.action-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;transition:all 0.2s;font-size:14px;color:var(--txt-muted)}
+.action-btn:hover{background:rgba(212,175,55,0.08);color:var(--gold)}
+.action-btn.danger:hover{background:rgba(255,7,58,0.1);color:var(--red)}
+.status-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.status-active{background:rgba(57,255,20,0.08);color:var(--green);border:1px solid rgba(57,255,20,0.2)}
+.status-inactive{background:rgba(255,7,58,0.08);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+
+.pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:16px;padding:12px;flex-wrap:wrap}
+.pagination button{padding:6px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--txt-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.pagination button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.pagination button:disabled{opacity:0.4;cursor:not-allowed}
+.pagination button.active{background:rgba(212,175,55,0.15);color:var(--gold);border-color:var(--gold)}
+.pagination .page-info{color:var(--txt-muted);font-size:12px;font-weight:600}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--txt-faint)}
+.empty-state i{font-size:48px;margin-bottom:12px;opacity:0.3}
+.empty-state p{font-size:14px;font-weight:600}
+
+.modal-overlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card-bg);border-radius:var(--r-lg);padding:24px;max-width:500px;width:92%;max-height:85vh;overflow-y:auto;border:1px solid var(--gold-dim);box-shadow:var(--shadow-lg);animation:modalIn 0.3s var(--ease)}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(0.95)}to{opacity:1;transform:none}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-header h3{color:var(--gold);font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+.modal-close{background:none;border:none;color:var(--txt-muted);font-size:22px;cursor:pointer;transition:color 0.2s;padding:4px}
+.modal-close:hover{color:var(--red)}
+.modal-body{margin-bottom:16px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.form-group{margin-bottom:12px}
+.form-group label{font-size:12px;color:var(--txt-muted);font-weight:700;display:block;margin-bottom:5px}
+.form-group input,.form-group select{width:100%;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;transition:all 0.2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,0.06)}
+.form-group .error-msg{color:var(--red);font-size:11px;margin-top:4px;display:none}
+.form-group.has-error input, .form-group.has-error select{border-color:var(--red)}
+.form-group.has-error .error-msg{display:block}
+
+.e-signature{margin-top:20px;padding:18px;background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);text-align:center;backdrop-filter:blur(10px)}
+.sig-label{font-size:10px;color:var(--txt-faint);margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.sig-label .verify-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(57,255,20,0.15);animation:blink 2s ease-in-out infinite}
+.sig-name{font-family:var(--font-sig);font-size:24px;font-weight:400;color:var(--gold);letter-spacing:0.5px}
+.sig-line{width:90%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);margin:4px auto 0;border-radius:2px}
+.sig-title{font-size:11px;color:var(--txt-muted);margin-top:8px;font-weight:600}
+
+.footer-bar{width:100%;margin-top:auto;padding:12px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));color:var(--txt-faint);font-size:11px;font-weight:600;letter-spacing:0.3px;border-top:1px solid var(--border);border-radius:0 0 var(--r-md) var(--r-md)}
+
+.mobile-toggle{display:none;position:fixed;top:16px;right:16px;z-index:1001;background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;border:none;width:42px;height:42px;border-radius:10px;font-size:17px;cursor:pointer;box-shadow:0 4px 16px rgba(139,0,0,0.3);border:1px solid rgba(212,175,55,0.2)}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(100%);width:300px}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-right:0;padding:14px}
+  .mobile-toggle{display:block}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .official-header{padding-top:60px}
+  .security-badge,.version-badge{display:none}
+  .page-header .actions .btn span{display:none}
+  .version-badge{right:16px}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .page-header{flex-direction:column;align-items:stretch}
+  .header-title{font-size:1.1rem}
+  .heart-wrap{width:70px;height:70px}
+  .emblem-ring{width:60px;height:60px}
+  .emblem-inner{width:60px;height:60px}
+  .emblem-inner img{width:40px;height:40px}
+  .search-bar{flex-direction:column}
+  .search-input{min-width:auto;width:100%}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="toast-region" id="toastRegion" role="log" aria-live="polite" aria-atomic="false"></div>
+<div class="security-badge" role="status"><i class="fas fa-shield-alt" style="margin-left:4px"></i>اتصال آمن · TLS 1.3</div>
+<div class="version-badge">نظام الشكاوى · v2.1 · 2026</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="القائمة"><i class="fas fa-bars"></i></button>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-heart-pulse" style="color:var(--red)"></i> مركز القلب</h2>
+    <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+
+  <nav>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الرئيسية</div>
+      <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+      <a href="new-complaint.html" class="nav-item"><i class="fas fa-plus-circle"></i> شكوى جديدة</a>
+      <a href="complaint-detail.html" class="nav-item"><i class="fas fa-file-lines"></i> تفاصيل الشكوى</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الخدمات الطبية</div>
+      <a href="doctors.html" class="nav-item"><i class="fas fa-user-doctor"></i> الأطباء</a>
+      <a href="services.html" class="nav-item"><i class="fas fa-money-bill-wave"></i> الخدمات والأسعار</a>
+      <a href="appointments.html" class="nav-item"><i class="fas fa-calendar-check"></i> حجز المواعيد</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">التواصل</div>
+      <a href="consultations.html" class="nav-item"><i class="fas fa-comments"></i> الاستشارات الطبية</a>
+      <a href="schedule.html" class="nav-item"><i class="fas fa-clock"></i> جدول الدوام</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الإدارة</div>
+      <a href="users.html" class="nav-item active"><i class="fas fa-users-cog"></i> إدارة المستخدمين</a>
+      <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> الإعدادات</a>
+      <a href="logs.html" class="nav-item"><i class="fas fa-history"></i> سجل الأحداث</a>
+      <a href="backup.html" class="nav-item"><i class="fas fa-database"></i> النسخ الاحتياطي</a>
+    </div>
+  </nav>
+
+  <div class="user-card">
+    <div class="user-avatar" id="userAvatar">م</div>
+    <div class="user-info">
+      <div class="name" id="userName">--</div>
+      <div class="role" id="userRole">--</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</aside>
+
+<main class="main-content">
+
+  <header class="official-header">
+    <div class="emblem-ring">
+      <svg class="ring-svg" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="52" cy="52" r="48" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="6 4" stroke-linecap="round"/>
+        <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="104" y2="104" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#D4AF37" stop-opacity="0.8"/><stop offset="50%" stop-color="#00F3FF" stop-opacity="0.3"/><stop offset="100%" stop-color="#D4AF37" stop-opacity="0.8"/></linearGradient></defs>
+      </svg>
+      <div class="emblem-inner">
+        <img src="images/logo.png" alt="شعار الوزارة" width="55" height="55" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="emblem-fallback" aria-hidden="true">🏥</div>
+      </div>
+    </div>
+    <h1 class="header-title">الجمهورية اليمنية</h1>
+    <p class="header-sub">وزارة الصحة والبيئة</p>
+    <p class="header-office">هيئة مستشفى الثورة العام — مركز القلب والقسطرة القلبية</p>
+    <div class="heart-wrap">
+      <img src="images/heart.png" alt="مركز القلب" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div class="heart-fallback" aria-hidden="true">❤️</div>
+    </div>
+    <div class="header-divider" aria-hidden="true">
+      <span></span><i class="fas fa-star"></i><i class="fas fa-circle" style="font-size:5px"></i><i class="fas fa-star"></i><span></span>
+    </div>
+    <div class="yemen-flag-chip">
+      <div class="yemen-flag"><span class="red"></span><span class="white"></span><span class="black"></span></div>
+      <span class="flag-label">اليمن</span>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <h1><i class="fas fa-users-cog" style="color:var(--gold)"></i>إدارة المستخدمين</h1>
+    <div class="actions">
+      <button class="btn btn-refresh" onclick="loadUsers()" title="تحديث"><i class="fas fa-sync-alt"></i><span>تحديث</span></button>
+      <button class="btn btn-add" onclick="showAddUserModal()"><i class="fas fa-user-plus"></i><span>إضافة مستخدم</span></button>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <a href="dashboard.html" class="quick-action"><i class="fas fa-chart-line"></i><span class="qa-label">لوحة التحكم</span></a>
+    <a href="new-complaint.html" class="quick-action"><i class="fas fa-file-pen"></i><span class="qa-label">شكوى جديدة</span></a>
+    <a href="doctors.html" class="quick-action"><i class="fas fa-user-doctor"></i><span class="qa-label">الأطباء</span></a>
+    <a href="settings.html" class="quick-action"><i class="fas fa-cog"></i><span class="qa-label">الإعدادات</span></a>
+    <a href="logs.html" class="quick-action"><i class="fas fa-history"></i><span class="qa-label">سجل الأحداث</span></a>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="ابحث بالاسم أو البريد أو القسم..." oninput="debouncedSearch()">
+    <select class="filter-select" id="roleFilter" onchange="debouncedSearch()">
+      <option value="">جميع الأدوار</option>
+      <option value="admin">مدير</option>
+      <option value="doctor">طبيب</option>
+      <option value="nurse">ممرض</option>
+      <option value="patient">مريض</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="debouncedSearch()">
+      <option value="">جميع الحالات</option>
+      <option value="active">نشط</option>
+      <option value="inactive">غير نشط</option>
+    </select>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card total" onclick="filterByStat('all')">
+      <div class="stat-label"><i class="fas fa-users"></i>إجمالي المستخدمين</div>
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+    </div>
+    <div class="stat-card active" onclick="filterByStat('active')">
+      <div class="stat-label"><i class="fas fa-check-circle"></i>نشطون</div>
+      <div class="stat-value" id="statActive">0</div>
+      <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+    </div>
+    <div class="stat-card admins" onclick="filterByStat('admin')">
+      <div class="stat-label"><i class="fas fa-shield-alt"></i>المديرون</div>
+      <div class="stat-value" id="statAdmins">0</div>
+      <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+    </div>
+    <div class="stat-card doctors" onclick="filterByStat('doctor')">
+      <div class="stat-label"><i class="fas fa-user-doctor"></i>الأطباء</div>
+      <div class="stat-value" id="statDoctors">0</div>
+      <div class="stat-icon"><i class="fas fa-user-doctor"></i></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>المستخدم</th>
+          <th>البريد الإلكتروني</th>
+          <th>الدور</th>
+          <th>القسم</th>
+          <th>الحالة</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="usersBody">
+        <tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+
+  <div class="e-signature">
+    <div class="sig-label"><span class="verify-dot"></span>توقيع إلكتروني معتمد</div>
+    <div class="sig-name">Dr. Salah Al-Ahdal</div>
+    <div class="sig-line"></div>
+    <div class="sig-title">هندسة وتطوير البرمجيات الطبية</div>
+  </div>
+
+  <div class="footer-bar">
+    © 2026 وزارة الصحة والبيئة — هيئة مستشفى الثورة العام | جميع الحقوق محفوظة
+  </div>
+</main>
+
+<script>
+'use strict';
+
+/* ============================================================
+   PASSWORD UTILITIES (SHA-256)
+   ============================================================ */
+const PasswordUtils = {
+  /**
+   * تشفير كلمة المرور باستخدام SHA-256
+   */
+  async hash(password) {
+    if (!password) return '';
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password.trim());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  /**
+   * التحقق من كلمة المرور
+   * تدعم كلمات المرور المشفرة (الجديدة) وغير المشفرة (القديمة)
+   */
+  async verify(plainPassword, storedPassword) {
+    if (!plainPassword || !storedPassword) return false;
+
+    const trimmedPlain = plainPassword.trim();
+
+    // If stored password is 64 chars (SHA-256 hex)
+    if (storedPassword.length === 64 && /^[a-f0-9]{64}$/i.test(storedPassword)) {
+      const hashedPlain = await this.hash(trimmedPlain);
+      return hashedPlain === storedPassword.toLowerCase();
+    }
+
+    // If not encrypted (old data), compare directly
+    return trimmedPlain === storedPassword;
+  }
+};
+
+/* ============================================================
+   DB MODULE (Fixed Implementation)
+   ============================================================ */
+const DB = (function() {
+  const STORAGE_KEY = 'hc_users_v2';
+  const LOG_KEY = 'hc_logs';
+
+  function getUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+  }
+
+  function addLog(action, details) {
+    const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+    logs.unshift({
+      id: Date.now() + Math.random(),
+      action,
+      details,
+      timestamp: Date.now(),
+      user: JSON.parse(localStorage.getItem('hc_currentUser') || '{}').email || 'unknown'
+    });
+    if (logs.length > 500) logs.length = 500;
+    localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+  }
+
+  /**
+   * Normalize email:
+   * - Remove whitespace
+   * - Convert to lowercase
+   */
+  function normalizeEmail(email) {
+    return (email || '').trim().toLowerCase();
+  }
+
+  // Seed demo data if empty
+  async function seedData() {
+    const users = getUsers();
+    if (users.length === 0) {
+      const demoUsers = [
+        { name: 'د. صلاح الأحمدي', email: 'admin@heartcenter.ye', password: 'admin123', role: 'admin', department: 'إدارة المركز', phone: '777000000', status: 'active', createdAt: Date.now() },
+        { name: 'د. أحمد القاضي', email: 'dr.ahmed@heartcenter.ye', password: 'doctor123', role: 'doctor', department: 'جراحة القلب', phone: '777111111', status: 'active', createdAt: Date.now() - 86400000 },
+        { name: 'ممرضة فاطمة', email: 'nurse.fatima@heartcenter.ye', password: 'nurse123', role: 'nurse', department: 'العناية المركزة', phone: '777222222', status: 'active', createdAt: Date.now() - 172800000 },
+        { name: 'مريض علي', email: 'patient.ali@heartcenter.ye', password: 'patient123', role: 'patient', department: '—', phone: '777333333', status: 'active', createdAt: Date.now() - 259200000 },
+        { name: 'ممرض خالد', email: 'nurse.khaled@heartcenter.ye', password: 'nurse123', role: 'nurse', department: 'الطوارئ', phone: '777444444', status: 'inactive', createdAt: Date.now() - 345600000 }
+      ];
+
+      // Encrypt demo passwords
+      for (const user of demoUsers) {
+        user.password = await PasswordUtils.hash(user.password);
+      }
+
+      saveUsers(demoUsers);
+    }
+  }
+
+  return {
+    init: async function() {
+      await seedData();
+      return true;
+    },
+
+    getAllUsers: async function() {
+      return getUsers();
+    },
+
+    /**
+     * Find user by email - case insensitive
+     */
+    getUserByEmail: async function(email) {
+      const normalized = normalizeEmail(email);
+      return getUsers().find(u => normalizeEmail(u.email) === normalized) || null;
+    },
+
+    /**
+     * Verify login credentials
+     * USE THIS in your login page (index.html)
+     */
+    verifyCredentials: async function(email, password) {
+      const user = await this.getUserByEmail(email);
+      if (!user) return null;
+      if (user.status === 'inactive') return null;
+
+      const isValid = await PasswordUtils.verify(password, user.password);
+      if (!isValid) return null;
+
+      return user;
+    },
+
+    saveUser: async function(user) {
+      const users = getUsers();
+
+      // Normalize email before saving
+      user.email = normalizeEmail(user.email);
+
+      const idx = users.findIndex(u => normalizeEmail(u.email) === user.email);
+      if (idx >= 0) {
+        users[idx] = { ...users[idx], ...user, email: users[idx].email };
+        addLog('UPDATE_USER', 'تم تحديث المستخدم: ' + user.email);
+      } else {
+        users.push(user);
+        addLog('CREATE_USER', 'تم إنشاء المستخدم: ' + user.email);
+      }
+      saveUsers(users);
+      return true;
+    },
+
+    deleteUser: async function(email) {
+      const normalized = normalizeEmail(email);
+      const users = getUsers().filter(u => normalizeEmail(u.email) !== normalized);
+      saveUsers(users);
+      addLog('DELETE_USER', 'تم حذف المستخدم: ' + email);
+      return true;
+    }
+  };
+})();
+
+/* ============================================================
+   CANVAS PARTICLES BACKGROUND
+   ============================================================ */
+(function initCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes = [];
+  let animId = null;
+  const GOLD = 'rgba(212,175,55,', CYAN = 'rgba(0,243,255,', RED = 'rgba(139,0,0,';
+  let isActive = true;
+
+  function resize() { 
+    W = canvas.width = window.innerWidth; 
+    H = canvas.height = window.innerHeight; 
+  }
+
+  function buildNodes(n) {
+    nodes = Array.from({ length: n }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5,
+      color: Math.random() < 0.6 ? GOLD : Math.random() < 0.5 ? CYAN : RED,
+      alpha: Math.random() * 0.3 + 0.1
+    }));
+  }
+
+  function draw() {
+    if (!isActive) return;
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < nodes.length; i++) {
+      const ni = nodes[i];
+      for (let j = i + 1; j < nodes.length; j++) {
+        const nj = nodes[j];
+        const dx = ni.x - nj.x, dy = ni.y - nj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const a = (1 - dist / 120) * 0.1;
+          ctx.beginPath(); 
+          ctx.strokeStyle = ni.color + a + ')'; 
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(ni.x, ni.y); 
+          ctx.lineTo(nj.x, nj.y); 
+          ctx.stroke();
+        }
+      }
+
+      ctx.beginPath(); 
+      ctx.arc(ni.x, ni.y, ni.r, 0, Math.PI * 2);
+      ctx.fillStyle = ni.color + ni.alpha + ')'; 
+      ctx.fill();
+
+      ni.x += ni.vx; 
+      ni.y += ni.vy;
+      if (ni.x < 0 || ni.x > W) ni.vx *= -1;
+      if (ni.y < 0 || ni.y > H) ni.vy *= -1;
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isActive = false;
+      if (animId) cancelAnimationFrame(animId);
+    } else {
+      isActive = true;
+      draw();
+    }
+  });
+
+  window.addEventListener('resize', () => { 
+    resize(); 
+    buildNodes(Math.min(50, Math.floor((W * H) / 30000))); 
+  });
+
+  resize(); 
+  buildNodes(Math.min(50, Math.floor((W * H) / 30000))); 
+  draw();
+})();
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+const TOAST_ICONS = { 
+  success: 'fa-check-circle', 
+  error: 'fa-times-circle', 
+  warning: 'fa-exclamation-triangle', 
+  info: 'fa-info-circle' 
+};
+
+function toast(message, type, duration) {
+  type = type || 'info';
+  duration = duration || 4000;
+  const region = document.getElementById('toastRegion');
+  if (!region) return;
+
+  while (region.children.length >= 4) {
+    region.firstChild.remove();
+  }
+
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = '<i class="fas ' + (TOAST_ICONS[type] || TOAST_ICONS.info) + '"></i><span>' + escapeHtml(message) + '</span>';
+
+  const style = document.createElement('style');
+  style.textContent = '.toast:nth-last-child(1)::before { animation-duration: ' + duration + 'ms !important; }';
+  t.appendChild(style);
+
+  region.appendChild(t);
+
+  setTimeout(() => {
+    t.classList.add('is-out');
+    t.addEventListener('animationend', () => t.remove(), { once: true });
+  }, duration);
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('hc_theme', isLight ? 'light' : 'dark');
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function initTheme() {
+  if (localStorage.getItem('hc_theme') === 'light') {
+    document.body.classList.add('light-theme');
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.className = 'fas fa-sun';
+  }
+}
+
+/* ============================================================
+   PAGINATION STATE
+   ============================================================ */
+let allUsers = [];
+let filteredUsers = [];
+let currentPage = 1;
+const ITEMS_PER_PAGE = 10;
+
+/* ============================================================
+   LOAD USERS
+   ============================================================ */
+async function loadUsers() {
+  try {
+    const users = await DB.getAllUsers();
+    allUsers = users || [];
+    filteredUsers = allUsers.slice();
+    currentPage = 1;
+
+    updateStats();
+    applyFilters();
+
+    toast('تم تحديث البيانات', 'success', 2000);
+  } catch (e) {
+    console.error('فشل تحميل المستخدمين:', e);
+    toast('فشل تحميل المستخدمين: ' + (e.message || 'خطأ غير معروف'), 'error');
+    showEmptyState('حدث خطأ أثناء تحميل البيانات');
+  }
+}
+
+function updateStats() {
+  const users = allUsers;
+  document.getElementById('statTotal').textContent = users.length;
+  document.getElementById('statActive').textContent = users.filter(function(u) { return u.status !== 'inactive'; }).length;
+  document.getElementById('statAdmins').textContent = users.filter(function(u) { return u.role === 'admin'; }).length;
+  document.getElementById('statDoctors').textContent = users.filter(function(u) { return u.role === 'doctor'; }).length;
+}
+
+function showEmptyState(msg) {
+  document.getElementById('usersBody').innerHTML = 
+    '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i><p>' + escapeHtml(msg) + '</p></td></tr>';
+  document.getElementById('pagination').innerHTML = '';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('usersBody');
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  const pageUsers = filteredUsers.slice(start, end);
+
+  const roleLabels = { admin: 'مدير', doctor: 'طبيب', nurse: 'ممرض', patient: 'مريض' };
+  const roleClasses = { admin: 'role-admin', doctor: 'role-doctor', nurse: 'role-nurse', patient: 'role-patient' };
+
+  if (pageUsers.length === 0) {
+    showEmptyState('لا يوجد مستخدمين مطابقين لمعايير البحث');
+    return;
+  }
+
+  tbody.innerHTML = pageUsers.map(function(user) {
+    return '<tr>' +
+      '<td>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:35px;height:35px;background:linear-gradient(135deg,#8B0000,#D4AF37);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0">' +
+            escapeHtml((user.name || '؟').charAt(0)) +
+          '</div>' +
+          '<div>' +
+            '<div style="font-weight:700;color:var(--txt)">' + escapeHtml(user.name || 'غير معروف') + '</div>' +
+            '<div style="font-size:11px;color:var(--txt-faint)">' + escapeHtml(user.phone || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</td>' +
+      '<td>' + escapeHtml(user.email) + '</td>' +
+      '<td><span class="role-badge ' + (roleClasses[user.role] || '') + '">' + (roleLabels[user.role] || escapeHtml(user.role)) + '</span></td>' +
+      '<td>' + escapeHtml(user.department || '—') + '</td>' +
+      '<td><span class="status-badge ' + (user.status === 'inactive' ? 'status-inactive' : 'status-active') + '">' + (user.status === 'inactive' ? 'غير نشط' : 'نشط') + '</span></td>' +
+      '<td>' +
+        '<div style="display:flex;gap:4px">' +
+          '<button class="action-btn" onclick="showEditUserModal(\'' + escapeHtml(user.email) + '\')" title="تعديل"><i class="fas fa-edit"></i></button>' +
+          '<button class="action-btn" onclick="toggleUserStatus(\'' + escapeHtml(user.email) + '\')" title="تبديل الحالة"><i class="fas ' + (user.status === 'inactive' ? 'fa-play' : 'fa-pause') + '"></i></button>' +
+          '<button class="action-btn danger" onclick="deleteUser(\'' + escapeHtml(user.email) + '\')" title="حذف"><i class="fas fa-trash-alt"></i></button>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const container = document.getElementById('pagination');
+
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = '<div class="page-info">صفحة ' + currentPage + ' من ' + totalPages + ' (' + filteredUsers.length + ' نتيجة)</div>';
+  html += '<div style="display:flex;gap:4px">';
+
+  html += '<button onclick="goToPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '><i class="fas fa-chevron-right"></i></button>';
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      html += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+    } else if (i === currentPage - 2 || i === currentPage + 2) {
+      html += '<span style="color:var(--txt-faint);padding:0 4px">...</span>';
+    }
+  }
+
+  html += '<button onclick="goToPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-left"></i></button>';
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function goToPage(page) {
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderTable();
+  document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ============================================================
+   SEARCH & FILTER
+   ============================================================ */
+let searchTimeout = null;
+
+function debouncedSearch() {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(applyFilters, 300);
+}
+
+function applyFilters() {
+  const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  const role = document.getElementById('roleFilter').value;
+  const status = document.getElementById('statusFilter').value;
+
+  filteredUsers = allUsers.filter(function(user) {
+    const matchQuery = !query || 
+      (user.name || '').toLowerCase().includes(query) ||
+      (user.email || '').toLowerCase().includes(query) ||
+      (user.department || '').toLowerCase().includes(query) ||
+      (user.phone || '').includes(query);
+
+    const matchRole = !role || user.role === role;
+    const matchStatus = !status || user.status === status;
+
+    return matchQuery && matchRole && matchStatus;
+  });
+
+  currentPage = 1;
+  renderTable();
+}
+
+function filterByStat(type) {
+  document.getElementById('searchInput').value = '';
+
+  if (type === 'all') {
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+  } else if (type === 'active') {
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = 'active';
+  } else {
+    document.getElementById('roleFilter').value = type;
+    document.getElementById('statusFilter').value = '';
+  }
+
+  applyFilters();
+}
+
+/* ============================================================
+   VALIDATION
+   ============================================================ */
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validatePassword(password) {
+  return password && password.length >= 6;
+}
+
+function validatePhone(phone) {
+  return !phone || /^[0-9+\-\s]{7,15}$/.test(phone);
+}
+
+function showFieldError(inputId, show) {
+  const group = document.getElementById(inputId);
+  if (!group) return;
+  const parent = group.closest('.form-group');
+  if (parent) {
+    if (show) parent.classList.add('has-error');
+    else parent.classList.remove('has-error');
+  }
+}
+
+function clearFieldErrors() {
+  document.querySelectorAll('.form-group.has-error').forEach(function(g) { g.classList.remove('has-error'); });
+}
+
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* ============================================================
+   GET CURRENT USER
+   ============================================================ */
+function getCurrentUser() {
+  try {
+    return JSON.parse(localStorage.getItem('hc_currentUser') || 'null');
+  } catch(e) {
+    return null;
+  }
+}
+
+/* ============================================================
+   SHOW ADD USER MODAL
+   ============================================================ */
+function showAddUserModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'activeModal';
+  overlay.innerHTML = 
+    '<div class="modal">' +
+      '<div class="modal-header">' +
+        '<h3><i class="fas fa-user-plus"></i>إضافة مستخدم جديد</h3>' +
+        '<button class="modal-close" onclick="closeModal()">&times;</button>' +
+      '</div>' +
+      '<div class="modal-body">' +
+        '<div class="form-group">' +
+          '<label>الاسم الكامل *</label>' +
+          '<input type="text" id="addName" placeholder="أدخل الاسم الكامل">' +
+          '<div class="error-msg">الاسم مطلوب</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>البريد الإلكتروني *</label>' +
+          '<input type="email" id="addEmail" placeholder="example@heartcenter.ye">' +
+          '<div class="error-msg">بريد إلكتروني صحيح مطلوب</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>كلمة المرور * (6 أحرف على الأقل)</label>' +
+          '<input type="password" id="addPassword" placeholder="أدخل كلمة المرور">' +
+          '<div class="error-msg">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>الدور *</label>' +
+          '<select id="addRole">' +
+            '<option value="patient">مريض</option>' +
+            '<option value="nurse">ممرض</option>' +
+            '<option value="doctor">طبيب</option>' +
+            '<option value="admin">مدير</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>القسم</label>' +
+          '<input type="text" id="addDepartment" placeholder="مثال: جراحة القلب">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>رقم الهاتف</label>' +
+          '<input type="text" id="addPhone" placeholder="77xxxxxxx">' +
+          '<div class="error-msg">رقم هاتف غير صحيح</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-footer">' +
+        '<button class="btn" style="background:var(--input-bg);color:var(--txt-muted);border:1px solid var(--border)" onclick="closeModal()">إلغاء</button>' +
+        '<button class="btn btn-add" onclick="saveNewUser()"><i class="fas fa-save"></i>حفظ</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    const el = document.getElementById('addName');
+    if (el) el.focus();
+  }, 100);
+}
+
+function closeModal() {
+  const modal = document.getElementById('activeModal');
+  if (modal) modal.remove();
+}
+
+/* ============================================================
+   SAVE NEW USER (FIXED)
+   ============================================================ */
+async function saveNewUser() {
+  clearFieldErrors();
+
+  const name = document.getElementById('addName').value.trim();
+  const email = document.getElementById('addEmail').value.trim();
+  const password = document.getElementById('addPassword').value;
+  const role = document.getElementById('addRole').value;
+  const department = document.getElementById('addDepartment').value.trim();
+  const phone = document.getElementById('addPhone').value.trim();
+
+  let hasError = false;
+
+  if (!name) {
+    showFieldError('addName', true);
+    hasError = true;
+  }
+
+  if (!validateEmail(email)) {
+    showFieldError('addEmail', true);
+    hasError = true;
+  }
+
+  if (!validatePassword(password)) {
+    showFieldError('addPassword', true);
+    hasError = true;
+  }
+
+  if (!validatePhone(phone)) {
+    showFieldError('addPhone', true);
+    hasError = true;
+  }
+
+  if (hasError) {
+    toast('يرجى تصحيح الأخطاء المحددة', 'error');
+    return;
+  }
+
+  try {
+    // Check existing (case-insensitive)
+    const existing = await DB.getUserByEmail(email);
+    if (existing) {
+      showFieldError('addEmail', true);
+      toast('البريد الإلكتروني مسجل بالفعل', 'error');
+      return;
+    }
+
+    // Hash password before saving
+    const hashedPassword = await PasswordUtils.hash(password);
+
+    const user = {
+      name: name,
+      email: email,
+      password: hashedPassword,
+      role: role,
+      department: department,
+      phone: phone,
+      status: 'active',
+      createdAt: Date.now()
+    };
+
+    await DB.saveUser(user);
+    closeModal();
+    await loadUsers();
+    toast('تم إضافة المستخدم بنجاح', 'success');
+  } catch (e) {
+    toast('فشل حفظ المستخدم: ' + (e.message || 'خطأ غير معروف'), 'error');
+  }
+}
+
+/* ============================================================
+   SHOW EDIT USER MODAL
+   ============================================================ */
+async function showEditUserModal(email) {
+  try {
+    const user = await DB.getUserByEmail(email);
+    if (!user) {
+      toast('المستخدم غير موجود', 'error');
+      return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'activeModal';
+    overlay.innerHTML = 
+      '<div class="modal">' +
+        '<div class="modal-header">' +
+          '<h3><i class="fas fa-edit"></i>تعديل المستخدم</h3>' +
+          '<button class="modal-close" onclick="closeModal()">&times;</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<div class="form-group">' +
+            '<label>الاسم الكامل</label>' +
+            '<input type="text" id="editName" value="' + escapeHtml(user.name || '') + '">' +
+            '<div class="error-msg">الاسم مطلوب</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>البريد الإلكتروني (لا يمكن تغييره)</label>' +
+            '<input type="email" id="editEmail" value="' + escapeHtml(user.email) + '" readonly style="opacity:0.6">' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>الدور</label>' +
+            '<select id="editRole">' +
+              '<option value="patient" ' + (user.role === 'patient' ? 'selected' : '') + '>مريض</option>' +
+              '<option value="nurse" ' + (user.role === 'nurse' ? 'selected' : '') + '>ممرض</option>' +
+              '<option value="doctor" ' + (user.role === 'doctor' ? 'selected' : '') + '>طبيب</option>' +
+              '<option value="admin" ' + (user.role === 'admin' ? 'selected' : '') + '>مدير</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>القسم</label>' +
+            '<input type="text" id="editDepartment" value="' + escapeHtml(user.department || '') + '">' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>رقم الهاتف</label>' +
+            '<input type="text" id="editPhone" value="' + escapeHtml(user.phone || '') + '">' +
+            '<div class="error-msg">رقم هاتف غير صحيح</div>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>الحالة</label>' +
+            '<select id="editStatus">' +
+              '<option value="active" ' + (user.status !== 'inactive' ? 'selected' : '') + '>نشط</option>' +
+              '<option value="inactive" ' + (user.status === 'inactive' ? 'selected' : '') + '>غير نشط</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button class="btn" style="background:var(--input-bg);color:var(--txt-muted);border:1px solid var(--border)" onclick="closeModal()">إلغاء</button>' +
+          '<button class="btn btn-add" onclick="saveEditUser(\'' + escapeHtml(email) + '\')"><i class="fas fa-save"></i>حفظ التعديلات</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  } catch (e) {
+    toast('فشل تحميل بيانات المستخدم', 'error');
+  }
+}
+
+/* ============================================================
+   SAVE EDIT USER
+   ============================================================ */
+async function saveEditUser(email) {
+  clearFieldErrors();
+
+  const name = document.getElementById('editName').value.trim();
+  const role = document.getElementById('editRole').value;
+  const department = document.getElementById('editDepartment').value.trim();
+  const phone = document.getElementById('editPhone').value.trim();
+  const status = document.getElementById('editStatus').value;
+
+  let hasError = false;
+
+  if (!name) {
+    showFieldError('editName', true);
+    hasError = true;
+  }
+
+  if (!validatePhone(phone)) {
+    showFieldError('editPhone', true);
+    hasError = true;
+  }
+
+  if (hasError) {
+    toast('يرجى تصحيح الأخطاء المحددة', 'error');
+    return;
+  }
+
+  try {
+    const user = await DB.getUserByEmail(email);
+    if (!user) {
+      toast('المستخدم غير موجود', 'error');
+      return;
+    }
+
+    user.name = name;
+    user.role = role;
+    user.department = department;
+    user.phone = phone;
+    user.status = status;
+    user.updatedAt = Date.now();
+
+    await DB.saveUser(user);
+    closeModal();
+    await loadUsers();
+    toast('تم حفظ التعديلات بنجاح', 'success');
+  } catch (e) {
+    toast('فشل حفظ التعديلات: ' + (e.message || 'خطأ غير معروف'), 'error');
+  }
+}
+
+/* ============================================================
+   TOGGLE USER STATUS
+   ============================================================ */
+async function toggleUserStatus(email) {
+  try {
+    const user = await DB.getUserByEmail(email);
+    if (!user) {
+      toast('المستخدم غير موجود', 'error');
+      return;
+    }
+
+    // Prevent disabling last active admin
+    if (user.role === 'admin' && user.status !== 'inactive') {
+      const activeAdmins = allUsers.filter(u => u.role === 'admin' && u.status !== 'inactive');
+      if (activeAdmins.length <= 1) {
+        toast('لا يمكن تعطيل آخر مدير نشط في النظام', 'warning', 5000);
+        return;
+      }
+    }
+
+    user.status = user.status === 'inactive' ? 'active' : 'inactive';
+    user.updatedAt = Date.now();
+
+    await DB.saveUser(user);
+    await loadUsers();
+
+    toast(
+      user.status === 'active' ? 'تم تفعيل المستخدم بنجاح' : 'تم تعطيل المستخدم بنجاح',
+      'success'
+    );
+  } catch (e) {
+    toast('فشل تغيير حالة المستخدم', 'error');
+  }
+}
+
+/* ============================================================
+   DELETE USER
+   ============================================================ */
+async function deleteUser(email) {
+  const user = await DB.getUserByEmail(email);
+  if (!user) {
+    toast('المستخدم غير موجود', 'error');
+    return;
+  }
+
+  // Prevent deleting last admin
+  if (user.role === 'admin') {
+    const activeAdmins = allUsers.filter(u => u.role === 'admin');
+    if (activeAdmins.length <= 1) {
+      toast('لا يمكن حذف آخر مدير في النظام', 'warning', 5000);
+      return;
+    }
+  }
+
+  // Prevent deleting current user
+  const currentUser = getCurrentUser();
+  if (currentUser && currentUser.email === email) {
+    toast('لا يمكنك حذف حسابك الحالي', 'warning', 5000);
+    return;
+  }
+
+  // Custom confirmation
+  const confirmModal = document.createElement('div');
+  confirmModal.className = 'modal-overlay';
+  confirmModal.id = 'activeModal';
+  confirmModal.innerHTML = 
+    '<div class="modal" style="max-width:400px">' +
+      '<div class="modal-header">' +
+        '<h3><i class="fas fa-trash-alt" style="color:var(--red)"></i>تأكيد الحذف</h3>' +
+        '<button class="modal-close" onclick="closeModal()">&times;</button>' +
+      '</div>' +
+      '<div class="modal-body">' +
+        '<p style="font-size:14px;color:var(--txt);text-align:center;padding:16px 0">' +
+          'هل أنت متأكد من حذف المستخدم:<br>' +
+          '<strong style="color:var(--gold)">' + escapeHtml(user.name) + '</strong><br>' +
+          '<small style="color:var(--txt-muted)">' + escapeHtml(user.email) + '</small>' +
+        '</p>' +
+        '<p style="font-size:12px;color:var(--orange);text-align:center">' +
+          '⚠️ هذا الإجراء لا يمكن التراجع عنه' +
+        '</p>' +
+      '</div>' +
+      '<div class="modal-footer" style="justify-content:center">' +
+        '<button class="btn" style="background:var(--input-bg);color:var(--txt-muted);border:1px solid var(--border)" onclick="closeModal()">إلغاء</button>' +
+        '<button class="btn" style="background:rgba(255,7,58,0.15);color:var(--red);border:1px solid rgba(255,7,58,0.3)" onclick="confirmDeleteUser(\'' + escapeHtml(email) + '\')">' +
+          '<i class="fas fa-trash-alt"></i>تأكيد الحذف' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(confirmModal);
+}
+
+async function confirmDeleteUser(email) {
+  try {
+    await DB.deleteUser(email);
+    closeModal();
+    await loadUsers();
+    toast('تم حذف المستخدم بنجاح', 'success');
+  } catch (e) {
+    closeModal();
+    toast('فشل حذف المستخدم: ' + (e.message || 'خطأ غير معروف'), 'error');
+  }
+}
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
+function logout() {
+  localStorage.removeItem('hc_currentUser');
+  sessionStorage.removeItem('hc_session');
+  toast('تم تسجيل الخروج بنجاح', 'info', 2000);
+  setTimeout(() => window.location.href = 'index.html', 800);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.querySelector('.mobile-toggle');
+    if (sidebar.classList.contains('open') && 
+        !sidebar.contains(e.target) && 
+        !toggleBtn.contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
+  }
+});
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault();
+    showAddUserModal();
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    const el = document.getElementById('searchInput');
+    if (el) el.focus();
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+    e.preventDefault();
+    loadUsers();
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init() {
+  initTheme();
+
+  // Check permissions
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    toast('يجب تسجيل الدخول أولاً', 'warning', 3000);
+    setTimeout(() => window.location.href = 'index.html', 1500);
+    return;
+  }
+
+  if (currentUser.role !== 'admin') {
+    toast('هذه الصفحة مخصصة للمدير فقط', 'error', 3000);
+    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+    return;
+  }
+
+  // Update sidebar user info
+  const roles = { admin: 'مدير النظام', doctor: 'طبيب', nurse: 'ممرض', patient: 'مريض' };
+  document.getElementById('userName').textContent = currentUser.name || 'مستخدم';
+  document.getElementById('userRole').textContent = roles[currentUser.role] || currentUser.role;
+  document.getElementById('userAvatar').textContent = (currentUser.name || 'م').charAt(0);
+
+  // Initialize DB
+  try {
+    await DB.init();
+  } catch (e) {
+    console.warn('فشل تهيئة قاعدة البيانات:', e);
+  }
+
+  // Load users
+  await loadUsers();
+
+  console.log('%c👥 صفحة إدارة المستخدمين v2.1', 'color:#D4AF37;font-size:14px;font-weight:900;');
+  console.log('%c🔒 محمية — للمدير فقط', 'color:#FF073A;font-size:11px;');
+  console.log('%c⌨️ اختصارات: Ctrl+N (إضافة) | Ctrl+F (بحث) | Ctrl+R (تحديث) | Esc (إغلاق)', 'color:#39FF14;font-size:11px;');
+}
+
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+</script>
+</body>
+</html>

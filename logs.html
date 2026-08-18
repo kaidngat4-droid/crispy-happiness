@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#8B0000">
+<meta name="description" content="سجل الأحداث - نظام الشكاوى الإلكتروني - مركز القلب والقسطرة القلبية">
+<title>سجل الأحداث | نظام الشكاوى | مركز القلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════
+   ROOT VARIABLES
+   ═══════════════════════════════════════════════ */
+:root {
+  --gold:#D4AF37; --gold-light:#F0D060; --gold-dim:rgba(212,175,55,0.18); --gold-glow:rgba(212,175,55,0.35);
+  --crimson:#8B0000; --crimson-mid:#A52A2A; --crimson-glow:rgba(139,0,0,0.5);
+  --cyan:#00F3FF; --cyan-dim:rgba(0,243,255,0.08);
+  --green:#39FF14; --red:#FF073A; --orange:#FF6B35;
+  --purple:#9b59b6; --blue:#3498db; --teal:#0d7377;
+  --bg:#080b10; --surface:rgba(14,18,28,0.92); --surface-hover:rgba(20,25,38,0.95);
+  --card-bg:rgba(14,18,28,0.85); --input-bg:rgba(8,11,18,0.7);
+  --txt:#ECF0F1; --txt-muted:#8a9bb0; --txt-faint:#4a5568;
+  --border:rgba(212,175,55,0.1);
+  --font:'Cairo','Tajawal',sans-serif; --font-ruqaa:'Aref Ruqaa',serif; --font-sig:'Great Vibes',cursive;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --transition:0.3s ease;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ═══════════════════════════════════════════════
+   LIGHT THEME
+   ═══════════════════════════════════════════════ */
+body.light-theme {
+  --bg:#f0f2f5; --surface:rgba(255,255,255,0.92); --surface-hover:rgba(240,242,245,0.95);
+  --card-bg:rgba(255,255,255,0.85); --input-bg:rgba(240,242,245,0.7);
+  --txt:#1a1a2e; --txt-muted:#4a5568; --txt-faint:#8a9bb0;
+  --border:rgba(0,0,0,0.1);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.1);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.15);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.2);
+}
+body.light-theme .security-badge,
+body.light-theme .version-badge{background:rgba(255,255,255,0.9);color:var(--txt)}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background var(--transition),color var(--transition)}
+#bgCanvas{position:fixed;inset:0;z-index:0;opacity:0.4}
+.grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(212,175,55,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════ */
+.toast-region{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10001;display:flex;flex-direction:column;gap:8px;width:min(90vw,400px);pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--r-md);font-size:0.82rem;font-weight:700;pointer-events:auto;box-shadow:var(--shadow-lg);animation:toastIn 0.4s var(--ease);backdrop-filter:blur(12px);line-height:1.4;position:relative;overflow:hidden}
+.toast::before{content:'';position:absolute;bottom:0;right:0;height:3px;background:currentColor;animation:toastTimer linear forwards}
+.toast.is-out{animation:toastOut 0.3s ease forwards}
+.toast.success{background:rgba(57,255,20,0.1);border:1px solid rgba(57,255,20,0.3);color:var(--green)}
+.toast.error{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red)}
+.toast.warning{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.toast.info{background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.3);color:var(--cyan)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(0.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
+@keyframes toastTimer{from{width:100%}to{width:0%}}
+
+/* ═══════════════════════════════════════════════
+   BADGES
+   ═══════════════════════════════════════════════ */
+.security-badge{position:fixed;top:16px;left:16px;z-index:1000;display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid rgba(57,255,20,0.25);border-radius:100px;font-size:11px;font-weight:700;color:var(--green);backdrop-filter:blur(12px)}
+.security-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.version-badge{position:fixed;top:16px;right:296px;z-index:1000;padding:6px 14px;background:rgba(10,14,22,0.85);border:1px solid var(--gold-dim);border-radius:100px;font-size:10px;font-weight:700;color:var(--gold);backdrop-filter:blur(12px)}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════ */
+.sidebar{position:fixed;right:0;top:0;width:280px;height:100vh;background:linear-gradient(180deg,#0a0e16 0%,rgba(14,18,28,0.98) 100%);border-left:1px solid var(--border);color:var(--txt);padding:24px 0;z-index:200;transition:transform 0.3s ease,background var(--transition);overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,0.3);display:flex;flex-direction:column}
+.sidebar-header{padding:0 24px 20px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:16px}
+.sidebar-header h2{font-size:16px;display:flex;align-items:center;gap:10px;color:var(--gold)}
+.sidebar-section{padding:8px 0;margin-bottom:8px}
+.sidebar-section-title{font-size:10px;font-weight:700;color:var(--txt-faint);text-transform:uppercase;letter-spacing:1px;padding:0 24px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--txt-muted);text-decoration:none;font-size:13px;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;font-family:inherit;border-right:3px solid transparent;text-align:right;white-space:nowrap}
+.nav-item:hover,.nav-item.active{background:rgba(212,175,55,0.06);color:var(--gold)}
+.nav-item.active{border-right-color:var(--gold);font-weight:700}
+.nav-item i{width:20px;text-align:center;font-size:14px;flex-shrink:0}
+.user-card{margin-top:auto;padding:16px 24px;background:rgba(0,0,0,0.25);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--crimson),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-info .name{font-weight:700;font-size:13px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info .role{font-size:11px;color:var(--txt-muted)}
+.logout-btn{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all 0.2s;font-family:inherit;flex-shrink:0}
+.logout-btn:hover{background:rgba(255,7,58,0.2)}
+.theme-toggle{background:transparent;border:none;color:var(--gold);font-size:17px;cursor:pointer;padding:6px;border-radius:50%;transition:all 0.2s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin-top:8px}
+.theme-toggle:hover{background:rgba(212,175,55,0.1)}
+
+/* ═══════════════════════════════════════════════
+   MAIN CONTENT
+   ═══════════════════════════════════════════════ */
+.main-content{margin-right:280px;padding:24px 28px;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+
+/* ═══════════════════════════════════════════════
+   OFFICIAL HEADER — ✅ تم تصحيح الشعار
+   ═══════════════════════════════════════════════ */
+.official-header{text-align:center;padding:24px 16px 20px;position:relative;z-index:1;background:linear-gradient(180deg,rgba(139,0,0,0.15),transparent 60%);border-radius:var(--r-lg);margin-bottom:20px}
+
+.emblem-ring{position:relative;width:88px;height:88px;margin:0 auto 12px}
+
+.emblem-ring svg.ring-svg{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);animation:spinRing 12s linear infinite}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+
+.emblem-inner{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  background:radial-gradient(135deg,rgba(212,175,55,0.15),rgba(139,0,0,0.1));
+  border:2px solid var(--gold-dim);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 30px rgba(212,175,55,0.15),inset 0 0 20px rgba(212,175,55,0.05);
+}
+
+.emblem-inner::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(212,175,55,0.08),transparent 60%);
+  border-radius:50%;
+  z-index:1;
+  pointer-events:none;
+}
+
+.emblem-inner img{
+  width:60px;
+  height:60px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));
+  animation:floatY 4s ease-in-out infinite;
+  position:relative;
+  z-index:2;
+  display:block;
+}
+
+.emblem-fallback{
+  display:none;
+  color:var(--gold);
+  font-size:1.4rem;
+  font-weight:900;
+  position:relative;
+  z-index:2;
+  align-items:center;
+  justify-content:center;
+}
+
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ═══ HEART ═══ */
+.heart-wrap{position:relative;width:90px;height:90px;margin:8px auto;display:flex;align-items:center;justify-content:center}
+.heart-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35));animation:heartPulse 1.2s ease-in-out infinite;display:block}
+.heart-fallback{display:none;font-size:46px;color:#e60023;animation:heartPulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35))}
+@keyframes heartPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.12)}40%{transform:scale(1)}60%{transform:scale(1.08)}}
+
+.header-title{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 24px rgba(212,175,55,0.4);line-height:1.2}
+.header-sub{font-size:0.88rem;font-weight:700;color:rgba(212,175,55,0.75);margin-top:3px}
+.header-office{font-size:0.72rem;font-weight:500;color:var(--txt-muted);margin-top:3px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.5}
+.header-divider{display:flex;align-items:center;gap:10px;margin:12px auto 0;max-width:280px}
+.header-divider span{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--gold-dim),transparent)}
+.header-divider i{color:var(--gold);font-size:9px;opacity:0.6}
+.yemen-flag-chip{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.yemen-flag{display:flex;flex-direction:column;width:24px;height:16px;border-radius:3px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.yemen-flag span{height:5.33px}
+.yemen-flag .red{background:#ce1126}.yemen-flag .white{background:#fff}.yemen-flag .black{background:#000}
+.flag-label{font-size:9px;color:var(--txt-muted);font-weight:600;letter-spacing:0.5px}
+
+/* ═══════════════════════════════════════════════
+   PAGE HEADER
+   ═══════════════════════════════════════════════ */
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.page-header h1{font-size:22px;color:var(--gold);font-weight:800;display:flex;align-items:center;gap:10px}
+.page-header .actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:var(--r-md);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;font-family:inherit;white-space:nowrap}
+.btn:active{transform:scale(0.97)}
+.btn-danger{background:rgba(255,7,58,0.1);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+.btn-danger:hover{background:rgba(255,7,58,0.2);transform:translateY(-2px)}
+.btn-export{background:rgba(33,150,243,0.1);color:#2196F3;border:1px solid rgba(33,150,243,0.2)}
+.btn-export:hover{background:rgba(33,150,243,0.2);transform:translateY(-2px)}
+
+/* ═══════════════════════════════════════════════
+   FILTERS
+   ═══════════════════════════════════════════════ */
+.filters-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;transition:all 0.2s}
+.search-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,0.06)}
+.search-input::placeholder{color:var(--txt-faint)}
+.filter-select{padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;min-width:140px;cursor:pointer}
+.filter-select:focus{border-color:var(--gold)}
+
+/* ═══════════════════════════════════════════════
+   LOGS
+   ═══════════════════════════════════════════════ */
+.logs-card{background:var(--card-bg);border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;flex:1;backdrop-filter:blur(10px)}
+.logs-list{max-height:600px;overflow-y:auto}
+.log-item{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.2s;animation:fadeUp 0.3s ease}
+.log-item:hover{background:rgba(212,175,55,0.03)}
+.log-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.log-icon.create{background:rgba(57,255,20,0.1);color:var(--green);border:1px solid rgba(57,255,20,0.2)}
+.log-icon.update{background:rgba(0,243,255,0.1);color:var(--cyan);border:1px solid rgba(0,243,255,0.2)}
+.log-icon.delete{background:rgba(255,7,58,0.1);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+.log-icon.login{background:rgba(212,175,55,0.1);color:var(--gold);border:1px solid rgba(212,175,55,0.2)}
+.log-icon.settings{background:rgba(156,39,176,0.1);color:var(--purple);border:1px solid rgba(156,39,176,0.2)}
+.log-icon.backup{background:rgba(255,107,53,0.1);color:var(--orange);border:1px solid rgba(255,107,53,0.2)}
+.log-content{flex:1;min-width:0}
+.log-action{font-weight:700;font-size:13px;color:var(--txt);margin-bottom:2px}
+.log-details{font-size:12px;color:var(--txt-muted);line-height:1.4}
+.log-meta{display:flex;gap:12px;font-size:10px;color:var(--txt-faint);margin-top:4px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:50px 20px;color:var(--txt-faint)}
+.empty-state i{font-size:48px;margin-bottom:12px;opacity:0.3}
+.empty-state p{font-size:14px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ═══════════════════════════════════════════════
+   SIGNATURE
+   ═══════════════════════════════════════════════ */
+.e-signature{margin-top:20px;padding:18px;background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);text-align:center;backdrop-filter:blur(10px)}
+.sig-label{font-size:10px;color:var(--txt-faint);margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.sig-label .verify-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(57,255,20,0.15);animation:blink 2s ease-in-out infinite}
+.sig-name{font-family:var(--font-sig);font-size:24px;color:var(--gold);letter-spacing:0.5px}
+.sig-line{width:90%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);margin:4px auto 0;border-radius:2px}
+.sig-title{font-size:11px;color:var(--txt-muted);margin-top:8px;font-weight:600}
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════ */
+.footer-bar{width:100%;margin-top:auto;padding:12px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));color:var(--txt-faint);font-size:11px;font-weight:600;letter-spacing:0.3px;border-top:1px solid var(--border);border-radius:0 0 var(--r-md) var(--r-md)}
+
+/* ═══════════════════════════════════════════════
+   MOBILE
+   ═══════════════════════════════════════════════ */
+.mobile-toggle{display:none;position:fixed;top:16px;right:16px;z-index:1001;background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;border:none;width:42px;height:42px;border-radius:10px;font-size:17px;cursor:pointer;box-shadow:0 4px 16px rgba(139,0,0,0.3);border:1px solid rgba(212,175,55,0.2)}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(100%);width:300px}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-right:0;padding:14px}
+  .mobile-toggle{display:block}
+  .official-header{padding-top:60px}
+  .security-badge,.version-badge{display:none}
+  .page-header .actions .btn span{display:none}
+  .version-badge{right:16px}
+}
+@media(max-width:480px){
+  .page-header{flex-direction:column;align-items:stretch}
+  .header-title{font-size:1.1rem}
+  .heart-wrap{width:70px;height:70px}
+  .emblem-ring{width:70px;height:70px}
+  .emblem-inner{width:70px;height:70px}
+  .emblem-inner img{width:45px;height:45px}
+  .filters-bar{flex-direction:column}
+  .search-input{min-width:auto;width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .ring-svg,.emblem-inner img,.heart-wrap img{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="toast-region" id="toastRegion" role="log" aria-live="polite"></div>
+<div class="security-badge" role="status"><i class="fas fa-shield-alt" style="margin-left:4px"></i>اتصال آمن · TLS 1.3</div>
+<div class="version-badge">نظام الشكاوى · v2.1 · 2026</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="القائمة"><i class="fas fa-bars"></i></button>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-heart-pulse" style="color:var(--red)"></i> مركز القلب</h2>
+    <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+  <nav>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الرئيسية</div>
+      <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+      <a href="new-complaint.html" class="nav-item"><i class="fas fa-plus-circle"></i> شكوى جديدة</a>
+      <a href="complaint-detail.html" class="nav-item"><i class="fas fa-file-lines"></i> تفاصيل الشكوى</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الخدمات الطبية</div>
+      <a href="doctors.html" class="nav-item"><i class="fas fa-user-doctor"></i> الأطباء</a>
+      <a href="services.html" class="nav-item"><i class="fas fa-money-bill-wave"></i> الخدمات والأسعار</a>
+      <a href="appointments.html" class="nav-item"><i class="fas fa-calendar-check"></i> حجز المواعيد</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">التواصل</div>
+      <a href="consultations.html" class="nav-item"><i class="fas fa-comments"></i> الاستشارات الطبية</a>
+      <a href="schedule.html" class="nav-item"><i class="fas fa-clock"></i> جدول الدوام</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الإدارة</div>
+      <a href="users.html" class="nav-item"><i class="fas fa-users-cog"></i> إدارة المستخدمين</a>
+      <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> الإعدادات</a>
+      <a href="logs.html" class="nav-item active"><i class="fas fa-history"></i> سجل الأحداث</a>
+      <a href="backup.html" class="nav-item"><i class="fas fa-database"></i> النسخ الاحتياطي</a>
+    </div>
+  </nav>
+  <div class="user-card">
+    <div class="user-avatar" id="userAvatar">م</div>
+    <div class="user-info">
+      <div class="name" id="userName">--</div>
+      <div class="role" id="userRole">--</div>
+    </div>
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</aside>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="main-content">
+
+  <!-- ✅ الترويسة الرسمية مع الشعار المصحح -->
+  <header class="official-header">
+    <div class="emblem-ring">
+      <svg class="ring-svg" viewBox="0 0 104 104" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="52" cy="52" r="48" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="6 4" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="104" y2="104" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.8"/>
+            <stop offset="50%" stop-color="#00F3FF" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.8"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="emblem-inner">
+        <img src="images/logo.png" 
+             alt="شعار الوزارة" 
+             width="60" 
+             height="60" 
+             loading="eager"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="emblem-fallback" aria-hidden="true" style="display:none;">🏥</div>
+      </div>
+    </div>
+    <h1 class="header-title">الجمهورية اليمنية</h1>
+    <p class="header-sub">وزارة الصحة والبيئة</p>
+    <p class="header-office">هيئة مستشفى الثورة العام — مركز القلب والقسطرة القلبية</p>
+    <div class="heart-wrap">
+      <img src="images/heart.png" 
+           alt="مركز القلب" 
+           loading="eager"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div class="heart-fallback" aria-hidden="true" style="display:none;">❤️</div>
+    </div>
+    <div class="header-divider" aria-hidden="true">
+      <span></span><i class="fas fa-star"></i><i class="fas fa-circle" style="font-size:5px"></i><i class="fas fa-star"></i><span></span>
+    </div>
+    <div class="yemen-flag-chip">
+      <div class="yemen-flag"><span class="red"></span><span class="white"></span><span class="black"></span></div>
+      <span class="flag-label">اليمن</span>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1><i class="fas fa-history" style="color:var(--gold)"></i>سجل الأحداث</h1>
+    <div class="actions">
+      <button class="btn btn-export" onclick="exportLogs()"><i class="fas fa-download"></i><span>تصدير CSV</span></button>
+      <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash-alt"></i><span>مسح الكل</span></button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="ابحث في السجلات..." oninput="filterLogs()">
+    <select class="filter-select" id="actionFilter" onchange="filterLogs()">
+      <option value="">جميع الإجراءات</option>
+      <option value="CREATE_USER">إنشاء مستخدم</option>
+      <option value="UPDATE_USER">تحديث مستخدم</option>
+      <option value="DELETE_USER">حذف مستخدم</option>
+      <option value="LOGIN">تسجيل دخول</option>
+      <option value="LOGOUT">تسجيل خروج</option>
+      <option value="CREATE">إنشاء شكوى</option>
+      <option value="UPDATE">تحديث شكوى</option>
+      <option value="DELETE">حذف شكوى</option>
+      <option value="STATUS_CHANGE">تغيير حالة</option>
+      <option value="SETTINGS_UPDATE">تحديث الإعدادات</option>
+      <option value="BACKUP">نسخ احتياطي</option>
+      <option value="RESTORE">استعادة</option>
+    </select>
+  </div>
+
+  <!-- Logs -->
+  <div class="logs-card">
+    <div class="logs-list" id="logsList">
+      <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></div>
+    </div>
+  </div>
+
+  <!-- Signature -->
+  <div class="e-signature">
+    <div class="sig-label"><span class="verify-dot"></span>توقيع إلكتروني معتمد</div>
+    <div class="sig-name">Dr. Salah Al-Ahdal</div>
+    <div class="sig-line"></div>
+    <div class="sig-title">هندسة وتطوير البرمجيات الطبية</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-bar">© 2026 وزارة الصحة والبيئة — هيئة مستشفى الثورة العام | جميع الحقوق محفوظة</div>
+</main>
+
+<script>
+'use strict';
+
+/* ═══ CANVAS BACKGROUND ═══ */
+(function initCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes = [];
+  let animId = null;
+  let isActive = true;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function buildNodes() {
+    nodes = Array.from({ length: Math.min(50, Math.floor((W * H) / 30000)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5,
+      color: Math.random() < 0.6 ? 'rgba(212,175,55,' : Math.random() < 0.5 ? 'rgba(0,243,255,' : 'rgba(139,0,0,',
+      alpha: Math.random() * 0.3 + 0.1
+    }));
+  }
+  function draw() {
+    if (!isActive) return;
+    ctx.clearRect(0, 0, W, H);
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const a = (1 - dist / 120) * 0.1;
+          ctx.beginPath(); ctx.strokeStyle = nodes[i].color + a + ')'; ctx.lineWidth = 0.5;
+          ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+        }
+      }
+      nodes.forEach(n => {
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = n.color + n.alpha + ')'; ctx.fill();
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+      });
+    }
+    animId = requestAnimationFrame(draw);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { isActive = false; if (animId) cancelAnimationFrame(animId); }
+    else { isActive = true; draw(); }
+  });
+  window.addEventListener('resize', () => { resize(); buildNodes(); });
+  resize(); buildNodes(); draw();
+})();
+
+/* ═══ TOAST ═══ */
+function toast(message, type, duration) {
+  type = type || 'info';
+  duration = duration || 4000;
+  const region = document.getElementById('toastRegion');
+  if (!region) return;
+  const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + message + '</span>';
+  region.appendChild(t);
+  setTimeout(() => { t.classList.add('is-out'); t.addEventListener('animationend', () => t.remove(), { once: true }); }, duration);
+}
+
+/* ═══ THEME ═══ */
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('hc_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeIcon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+/* ═══ SIDEBAR ═══ */
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function logout() {
+  localStorage.removeItem('hc_currentUser');
+  sessionStorage.removeItem('hc_session');
+  window.location.href = 'index.html';
+}
+
+/* ═══ ACTION LABELS ═══ */
+const ACTION_LABELS = {
+  'CREATE_USER': 'إنشاء مستخدم', 'UPDATE_USER': 'تحديث مستخدم', 'DELETE_USER': 'حذف مستخدم',
+  'LOGIN': 'تسجيل دخول', 'LOGOUT': 'تسجيل خروج',
+  'CREATE': 'إنشاء شكوى', 'UPDATE': 'تحديث شكوى', 'DELETE': 'حذف شكوى',
+  'STATUS_CHANGE': 'تغيير حالة', 'REPLY': 'إضافة رد',
+  'SETTINGS_UPDATE': 'تحديث الإعدادات', 'BACKUP': 'نسخ احتياطي', 'RESTORE': 'استعادة',
+  'SEED_DATA': 'تهيئة البيانات'
+};
+const ACTION_ICONS = {
+  'CREATE': 'create', 'CREATE_USER': 'create', 'UPDATE': 'update', 'UPDATE_USER': 'update',
+  'DELETE': 'delete', 'DELETE_USER': 'delete', 'LOGIN': 'login', 'LOGOUT': 'login',
+  'STATUS_CHANGE': 'update', 'SETTINGS_UPDATE': 'settings', 'BACKUP': 'backup',
+  'RESTORE': 'backup', 'SEED_DATA': 'settings'
+};
+const ACTION_FA_ICONS = {
+  'CREATE': 'fa-plus-circle', 'CREATE_USER': 'fa-user-plus', 'UPDATE': 'fa-edit',
+  'UPDATE_USER': 'fa-user-edit', 'DELETE': 'fa-trash-alt', 'DELETE_USER': 'fa-user-minus',
+  'LOGIN': 'fa-sign-in-alt', 'LOGOUT': 'fa-sign-out-alt', 'STATUS_CHANGE': 'fa-exchange-alt',
+  'REPLY': 'fa-reply', 'SETTINGS_UPDATE': 'fa-cog', 'BACKUP': 'fa-database',
+  'RESTORE': 'fa-undo', 'SEED_DATA': 'fa-seedling'
+};
+
+/* ═══ FORMAT DATE ═══ */
+function formatDate(timestamp) {
+  if (!timestamp) return '';
+  const d = new Date(timestamp);
+  return d.toLocaleDateString('ar-EG') + ' - ' + d.toLocaleTimeString('ar-EG');
+}
+
+/* ═══ LOAD LOGS ═══ */
+function loadLogs() {
+  const logs = JSON.parse(localStorage.getItem('hc_logs') || '[]');
+  renderLogs(logs);
+}
+
+/* ═══ RENDER LOGS ═══ */
+function renderLogs(logs) {
+  const container = document.getElementById('logsList');
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد سجلات</p></div>';
+    return;
+  }
+  container.innerHTML = logs.map(log => {
+    const actionLabel = ACTION_LABELS[log.action] || log.action;
+    const iconClass = ACTION_ICONS[log.action] || 'update';
+    const faIcon = ACTION_FA_ICONS[log.action] || 'fa-info-circle';
+    return '<div class="log-item">' +
+      '<div class="log-icon ' + iconClass + '"><i class="fas ' + faIcon + '"></i></div>' +
+      '<div class="log-content">' +
+        '<div class="log-action">' + actionLabel + '</div>' +
+        '<div class="log-details">' + (log.details || '') + '</div>' +
+        '<div class="log-meta">' +
+          '<span><i class="fas fa-user"></i> ' + (log.user || 'system') + '</span>' +
+          '<span><i class="fas fa-clock"></i> ' + formatDate(log.timestamp) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ═══ FILTER LOGS ═══ */
+function filterLogs() {
+  const query = (document.getElementById('searchInput').value || '').toLowerCase();
+  const actionFilter = document.getElementById('actionFilter').value;
+  const logs = JSON.parse(localStorage.getItem('hc_logs') || '[]');
+  const filtered = logs.filter(log => {
+    const matchQuery = !query || 
+      (log.action || '').toLowerCase().includes(query) ||
+      (log.details || '').toLowerCase().includes(query) ||
+      (log.user || '').toLowerCase().includes(query);
+    const matchAction = !actionFilter || log.action === actionFilter;
+    return matchQuery && matchAction;
+  });
+  renderLogs(filtered);
+}
+
+/* ═══ CLEAR LOGS ═══ */
+function clearLogs() {
+  if (!confirm('هل أنت متأكد من مسح جميع السجلات؟')) return;
+  localStorage.removeItem('hc_logs');
+  loadLogs();
+  toast('تم مسح جميع السجلات', 'success');
+}
+
+/* ═══ EXPORT LOGS ═══ */
+function exportLogs() {
+  const logs = JSON.parse(localStorage.getItem('hc_logs') || '[]');
+  if (logs.length === 0) { toast('لا توجد سجلات للتصدير', 'warning'); return; }
+  const headers = ['التاريخ', 'الإجراء', 'المستخدم', 'التفاصيل'];
+  let csv = '\uFEFF' + headers.join(',') + '\n';
+  logs.forEach(log => {
+    csv += '"' + formatDate(log.timestamp) + '","' + (ACTION_LABELS[log.action] || log.action) + '","' + (log.user || '') + '","' + (log.details || '').replace(/"/g, '""') + '"\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'سجل_الأحداث_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('تم تصدير السجلات بنجاح', 'success');
+}
+
+/* ═══ INIT ═══ */
+function init() {
+  const currentUser = JSON.parse(localStorage.getItem('hc_currentUser') || 'null');
+  if (!currentUser || currentUser.role !== 'admin') {
+    toast('يجب تسجيل الدخول كمدير للوصول لهذه الصفحة', 'error', 3000);
+    setTimeout(() => window.location.href = 'index.html', 2000);
+    return;
+  }
+  document.getElementById('userName').textContent = currentUser.name || 'مستخدم';
+  document.getElementById('userRole').textContent = 'مدير النظام';
+  document.getElementById('userAvatar').textContent = (currentUser.name || 'م').charAt(0);
+  if (localStorage.getItem('hc_theme') === 'light') {
+    document.body.classList.add('light-theme');
+    document.getElementById('themeIcon').className = 'fas fa-sun';
+  }
+  loadLogs();
+  console.log('%c📋 صفحة سجل الأحداث v2.1', 'color:#D4AF37;font-size:14px;font-weight:900;');
+}
+
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+</script>
+</body>
+</html>
