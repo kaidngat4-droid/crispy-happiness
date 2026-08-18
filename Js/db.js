@@ -3,7 +3,7 @@
  *  db.js — قاعدة البيانات المحلية | نظام الشكاوى الإلكتروني
  *  مركز القلب والقسطرة القلبية — الجمهورية اليمنية
  *  استشاري التصميم والتطوير الطبي: د/ صلاح الأهدل
- *  الإصدار: 2.0 — 2026
+ *  الإصدار: 3.0 — 2026
  * ═══════════════════════════════════════════════════════════════
  * 
  *  الوظائف الرئيسية:
@@ -12,6 +12,13 @@
  *  • العمل الكامل Offline بدون إنترنت
  *  • تصدير/استيراد JSON للنسخ الاحتياطي
  *  • بحث متقدم وفلترة الشكاوى
+ *  • تشفير كلمات المرور (SHA-256 + Salt)
+ *  • نظام صلاحيات متقدم (RBAC)
+ *  • صفحات متجزئة (Pagination)
+ *  • التحقق من صحة البيانات
+ *  • نظام SLA للتتبع
+ *  • ذكاء التخزين المؤقت (Smart Cache)
+ *  • طابور العمليات دون اتصال (Offline Queue)
  * ═══════════════════════════════════════════════════════════════
  */
 
@@ -22,13 +29,15 @@
    ═══════════════════════════════════════════════════════════════ */
 const DB_CONFIG = Object.freeze({
   DB_NAME: 'HeartCenterComplaintsDB',
-  DB_VERSION: 1,
+  DB_VERSION: 2,
   STORES: {
     USERS: 'users',
     COMPLAINTS: 'complaints',
     ATTACHMENTS: 'attachments',
     LOGS: 'logs',
-    SETTINGS: 'settings'
+    SETTINGS: 'settings',
+    NOTIFICATIONS: 'notifications',
+    OFFLINE_QUEUE: 'offlineQueue'
   },
   KEYS: {
     SESSION: 'hc_session',
@@ -36,18 +45,448 @@ const DB_CONFIG = Object.freeze({
     USERS: 'hc_users',
     COMPLAINTS: 'hc_complaints',
     LAST_SYNC: 'hc_lastSync',
-    SETTINGS: 'hc_settings'
-  }
+    SETTINGS: 'hc_settings',
+    NOTIFICATIONS: 'hc_notifications'
+  },
+  LIMITS: {
+    MAX_ATTACHMENT_SIZE: 5 * 1024 * 1024, // 5MB
+    ALLOWED_ATTACHMENT_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+    MAX_COMPLAINTS_PER_PAGE: 20,
+    CACHE_TTL: 60000, // 1 دقيقة
+    AUTO_BACKUP_INTERVAL: 86400000 // 24 ساعة
+  },
+  ROLES: Object.freeze({
+    ADMIN: { level: 4, label: 'مدير النظام', permissions: ['*'] },
+    DOCTOR: { level: 3, label: 'طبيب', permissions: ['read', 'update', 'reply', 'view_stats'] },
+    NURSE: { level: 2, label: 'ممرض', permissions: ['read', 'reply', 'view_stats'] },
+    PATIENT: { level: 1, label: 'مريض', permissions: ['create', 'read_own', 'update_own'] }
+  }),
+  SLA_TARGETS: Object.freeze({
+    URGENT: 2,    // ساعتين
+    HIGH: 24,     // 24 ساعة
+    MEDIUM: 72,   // 3 أيام
+    LOW: 168      // أسبوع
+  })
 });
 
 /* ═══════════════════════════════════════════════════════════════
-   2. فئة قاعدة البيانات الرئيسية (IndexedDB)
+   2. أدوات مساعدة (Utilities)
+   ═══════════════════════════════════════════════════════════════ */
+class DBError extends Error {
+  constructor(code, message, original = null) {
+    super(message);
+    this.name = 'DBError';
+    this.code = code;
+    this.original = original;
+    this.timestamp = Date.now();
+    this.arabicMessage = message;
+  }
+}
+
+class ValidationError extends Error {
+  constructor(field, message) {
+    super(message);
+    this.name = 'ValidationError';
+    this.field = field;
+  }
+}
+
+const Utils = {
+  /**
+   * تشفير كلمة المرور باستخدام SHA-256 + Salt
+   */
+  async hashPassword(password, salt = 'HeartCenter2026') {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  },
+
+  /**
+   * التحقق من كلمة المرور
+   */
+  async verifyPassword(password, hash) {
+    const hashed = await this.hashPassword(password);
+    return hashed === hash;
+  },
+
+  /**
+   * توليد معرف فريد
+   */
+  generateId() {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  },
+
+  /**
+   * التحقق من صحة البريد الإلكتروني
+   */
+  isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  },
+
+  /**
+   * التحقق من صحة رقم الهاتف اليمني
+   */
+  isValidYemeniPhone(phone) {
+    return /^(7[0-9]{8}|01[0-9]{8})$/.test(phone);
+  },
+
+  /**
+   * حساب الوقت المتبقي لـ SLA
+   */
+  calculateSLA(priority, createdAt) {
+    const hours = DB_CONFIG.SLA_TARGETS[priority?.toUpperCase()] || DB_CONFIG.SLA_TARGETS.LOW;
+    const deadline = new Date(createdAt).getTime() + (hours * 3600000);
+    const remaining = deadline - Date.now();
+    return {
+      deadline,
+      remaining,
+      hoursRemaining: Math.ceil(remaining / 3600000),
+      isOverdue: remaining < 0,
+      targetHours: hours
+    };
+  },
+
+  /**
+   * تنسيق التاريخ العربي
+   */
+  formatArabicDate(date) {
+    return new Date(date).toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  },
+
+  /**
+   * ضغط بيانات JSON
+   */
+  compressJSON(data) {
+    try {
+      return JSON.stringify(data);
+    } catch (e) {
+      throw new DBError('COMPRESS_ERROR', 'فشل ضغط البيانات', e);
+    }
+  },
+
+  /**
+   * إنشاء Blob URL من ArrayBuffer
+   */
+  arrayBufferToBlobUrl(buffer, type) {
+    const blob = new Blob([buffer], { type });
+    return URL.createObjectURL(blob);
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   3. التحقق من صحة البيانات (Validation Schema)
+   ═══════════════════════════════════════════════════════════════ */
+const ValidationSchemas = {
+  user: {
+    email: { required: true, type: 'email', message: 'البريد الإلكتروني غير صالح' },
+    password: { required: true, min: 6, max: 100, message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' },
+    name: { required: true, min: 2, max: 100, message: 'الاسم مطلوب' },
+    role: { required: true, enum: Object.keys(DB_CONFIG.ROLES), message: 'الدور غير صالح' },
+    phone: { required: false, pattern: /^(7[0-9]{8}|01[0-9]{8})$/, message: 'رقم الهاتف اليمني غير صالح' }
+  },
+
+  complaint: {
+    title: { required: true, min: 5, max: 200, message: 'العنوان يجب أن يكون بين 5 و 200 حرف' },
+    description: { required: true, min: 10, max: 5000, message: 'الوصف يجب أن يكون بين 10 و 5000 حرف' },
+    category: { required: true, message: 'التصنيف مطلوب' },
+    priority: { required: true, enum: ['low', 'medium', 'high', 'urgent'], message: 'الأولوية غير صالحة' },
+    email: { required: true, type: 'email', message: 'البريد الإلكتروني مطلوب' },
+    submitter: { required: true, min: 2, message: 'اسم المُرسل مطلوب' }
+  },
+
+  attachment: {
+    size: { max: DB_CONFIG.LIMITS.MAX_ATTACHMENT_SIZE, message: 'حجم الملف يتجاوز 5 ميجابايت' },
+    type: { enum: DB_CONFIG.LIMITS.ALLOWED_ATTACHMENT_TYPES, message: 'نوع الملف غير مسموح به' }
+  }
+};
+
+class Validator {
+  static validate(data, schema) {
+    const errors = [];
+    for (const [field, rules] of Object.entries(schema)) {
+      const value = data[field];
+
+      if (rules.required && (!value || (typeof value === 'string' && !value.trim()))) {
+        errors.push({ field, message: rules.message || `${field} مطلوب` });
+        continue;
+      }
+
+      if (!value) continue;
+
+      if (rules.min && String(value).length < rules.min) {
+        errors.push({ field, message: rules.message || `${field} قصير جداً` });
+      }
+
+      if (rules.max && String(value).length > rules.max) {
+        errors.push({ field, message: rules.message || `${field} طويل جداً` });
+      }
+
+      if (rules.type === 'email' && !Utils.isValidEmail(value)) {
+        errors.push({ field, message: rules.message || 'البريد الإلكتروني غير صالح' });
+      }
+
+      if (rules.pattern && !rules.pattern.test(String(value))) {
+        errors.push({ field, message: rules.message || `${field} غير صالح` });
+      }
+
+      if (rules.enum && !rules.enum.includes(value)) {
+        errors.push({ field, message: rules.message || `${field} قيمة غير صالحة` });
+      }
+    }
+    return errors;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. التخزين المؤقت الذكي (Smart Cache)
+   ═══════════════════════════════════════════════════════════════ */
+class SmartCache {
+  constructor(ttl = DB_CONFIG.LIMITS.CACHE_TTL) {
+    this.cache = new Map();
+    this.ttl = ttl;
+    this.hits = 0;
+    this.misses = 0;
+  }
+
+  get(key) {
+    const item = this.cache.get(key);
+    if (item && Date.now() - item.time < this.ttl) {
+      this.hits++;
+      return item.data;
+    }
+    if (item) this.cache.delete(key);
+    this.misses++;
+    return null;
+  }
+
+  set(key, data) {
+    this.cache.set(key, { data, time: Date.now() });
+  }
+
+  invalidate(pattern) {
+    for (const key of this.cache.keys()) {
+      if (key.includes(pattern)) this.cache.delete(key);
+    }
+  }
+
+  invalidateAll() {
+    this.cache.clear();
+  }
+
+  getStats() {
+    const total = this.hits + this.misses;
+    return {
+      hits: this.hits,
+      misses: this.misses,
+      hitRate: total > 0 ? (this.hits / total * 100).toFixed(2) + '%' : '0%',
+      size: this.cache.size
+    };
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. نظام الإشعارات (Notifications)
+   ═══════════════════════════════════════════════════════════════ */
+class NotificationManager {
+  constructor(db) {
+    this.db = db;
+    this.initialized = false;
+  }
+
+  async init() {
+    if (this.initialized) return;
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      this.initialized = permission === 'granted';
+    }
+  }
+
+  async notify(title, options = {}) {
+    const notification = {
+      id: Utils.generateId(),
+      title,
+      body: options.body || '',
+      icon: options.icon || '/logo.png',
+      tag: options.tag || Utils.generateId(),
+      complaintId: options.complaintId || null,
+      read: false,
+      createdAt: Date.now()
+    };
+
+    // حفظ في IndexedDB
+    try {
+      await this.db.ensureReady();
+      const tx = this.db.db.transaction(DB_CONFIG.STORES.NOTIFICATIONS, 'readwrite');
+      const store = tx.objectStore(DB_CONFIG.STORES.NOTIFICATIONS);
+      await store.add(notification);
+    } catch (e) {
+      // Fallback
+      const notifications = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.NOTIFICATIONS) || '[]');
+      notifications.push(notification);
+      localStorage.setItem(DB_CONFIG.KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    }
+
+    // عرض إشعار نظام التشغيل
+    if (this.initialized && 'Notification' in window) {
+      new Notification(title, {
+        body: options.body,
+        icon: options.icon,
+        tag: notification.tag,
+        requireInteraction: options.requireInteraction || false
+      });
+    }
+
+    return notification;
+  }
+
+  async getUnread() {
+    try {
+      await this.db.ensureReady();
+      const tx = this.db.db.transaction(DB_CONFIG.STORES.NOTIFICATIONS, 'readonly');
+      const store = tx.objectStore(DB_CONFIG.STORES.NOTIFICATIONS);
+      const all = await store.getAll();
+      return all.filter(n => !n.read).sort((a, b) => b.createdAt - a.createdAt);
+    } catch (e) {
+      const notifications = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.NOTIFICATIONS) || '[]');
+      return notifications.filter(n => !n.read).sort((a, b) => b.createdAt - a.createdAt);
+    }
+  }
+
+  async markAsRead(id) {
+    try {
+      await this.db.ensureReady();
+      const tx = this.db.db.transaction(DB_CONFIG.STORES.NOTIFICATIONS, 'readwrite');
+      const store = tx.objectStore(DB_CONFIG.STORES.NOTIFICATIONS);
+      const notification = await store.get(id);
+      if (notification) {
+        notification.read = true;
+        await store.put(notification);
+      }
+    } catch (e) {
+      const notifications = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.NOTIFICATIONS) || '[]');
+      const idx = notifications.findIndex(n => n.id === id);
+      if (idx >= 0) notifications[idx].read = true;
+      localStorage.setItem(DB_CONFIG.KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. طابور العمليات دون اتصال (Offline Queue)
+   ═══════════════════════════════════════════════════════════════ */
+class OfflineQueue {
+  constructor(db) {
+    this.db = db;
+    this.processing = false;
+    window.addEventListener('online', () => this.processQueue());
+  }
+
+  async add(action) {
+    const queueItem = {
+      id: Utils.generateId(),
+      action,
+      timestamp: Date.now(),
+      retries: 0,
+      maxRetries: 3
+    };
+
+    try {
+      await this.db.ensureReady();
+      const tx = this.db.db.transaction(DB_CONFIG.STORES.OFFLINE_QUEUE, 'readwrite');
+      const store = tx.objectStore(DB_CONFIG.STORES.OFFLINE_QUEUE);
+      await store.add(queueItem);
+    } catch (e) {
+      const queue = JSON.parse(localStorage.getItem('hc_offlineQueue') || '[]');
+      queue.push(queueItem);
+      localStorage.setItem('hc_offlineQueue', JSON.stringify(queue));
+    }
+
+    // محاولة المعالجة فوراً إذا كان متصلاً
+    if (navigator.onLine) {
+      await this.processQueue();
+    }
+  }
+
+  async processQueue() {
+    if (this.processing || !navigator.onLine) return;
+    this.processing = true;
+
+    try {
+      let queue = [];
+      try {
+        await this.db.ensureReady();
+        const tx = this.db.db.transaction(DB_CONFIG.STORES.OFFLINE_QUEUE, 'readonly');
+        const store = tx.objectStore(DB_CONFIG.STORES.OFFLINE_QUEUE);
+        queue = await store.getAll();
+      } catch (e) {
+        queue = JSON.parse(localStorage.getItem('hc_offlineQueue') || '[]');
+      }
+
+      const failed = [];
+      for (const item of queue.sort((a, b) => a.timestamp - b.timestamp)) {
+        try {
+          await this.executeAction(item.action);
+          // حذف بعد النجاح
+          try {
+            const tx = this.db.db.transaction(DB_CONFIG.STORES.OFFLINE_QUEUE, 'readwrite');
+            const store = tx.objectStore(DB_CONFIG.STORES.OFFLINE_QUEUE);
+            await store.delete(item.id);
+          } catch (e) {
+            // localStorage fallback handled below
+          }
+        } catch (e) {
+          item.retries++;
+          if (item.retries < item.maxRetries) {
+            failed.push(item);
+          } else {
+            console.error('❌ فشلت العملية بعد عدة محاولات:', item);
+          }
+        }
+      }
+
+      // تحديث localStorage fallback
+      localStorage.setItem('hc_offlineQueue', JSON.stringify(failed));
+    } finally {
+      this.processing = false;
+    }
+  }
+
+  async executeAction(action) {
+    switch (action.type) {
+      case 'ADD_COMPLAINT':
+        return await this.db.addComplaint(action.data);
+      case 'UPDATE_COMPLAINT':
+        return await this.db.updateComplaint(action.id, action.data);
+      case 'ADD_REPLY':
+        return await this.db.addReply(action.complaintId, action.data);
+      default:
+        throw new Error(`نوع العملية غير معروف: ${action.type}`);
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. فئة قاعدة البيانات الرئيسية (IndexedDB)
    ═══════════════════════════════════════════════════════════════ */
 class ComplaintsDB {
   constructor() {
     this.db = null;
     this.isReady = false;
     this.initPromise = null;
+    this.cache = new SmartCache();
+    this.notifications = new NotificationManager(this);
+    this.offlineQueue = new OfflineQueue(this);
+    this.eventListeners = new Map();
+    this.autoBackupTimer = null;
   }
 
   /**
@@ -61,16 +500,22 @@ class ComplaintsDB {
 
       request.onerror = () => {
         console.error('❌ فشل فتح IndexedDB:', request.error);
-        // Fallback إلى localStorage
         this.isReady = false;
-        reject(request.error);
+        reject(new DBError('DB_OPEN_FAILED', 'فشل فتح قاعدة البيانات', request.error));
       };
 
       request.onsuccess = () => {
         this.db = request.result;
         this.isReady = true;
         console.log('✅ IndexedDB جاهزة:', DB_CONFIG.DB_NAME);
+        this.startAutoBackup();
+        this.notifications.init();
         resolve(this.db);
+      };
+
+      request.onblocked = () => {
+        console.warn('⚠️ قاعدة البيانات محظورة — أغلق جميع التبويبات الأخرى');
+        this.emit('dbBlocked', { message: 'قاعدة البيانات محظورة' });
       };
 
       request.onupgradeneeded = (event) => {
@@ -81,6 +526,7 @@ class ComplaintsDB {
           const usersStore = db.createObjectStore(DB_CONFIG.STORES.USERS, { keyPath: 'email' });
           usersStore.createIndex('role', 'role', { unique: false });
           usersStore.createIndex('name', 'name', { unique: false });
+          usersStore.createIndex('department', 'department', { unique: false });
         }
 
         // مخزن الشكاوى
@@ -91,6 +537,8 @@ class ComplaintsDB {
           compStore.createIndex('email', 'email', { unique: false });
           compStore.createIndex('date', 'date', { unique: false });
           compStore.createIndex('category', 'category', { unique: false });
+          compStore.createIndex('status_priority', ['status', 'priority'], { unique: false });
+          compStore.createIndex('date_status', ['date', 'status'], { unique: false });
         }
 
         // مخزن المرفقات (Blobs)
@@ -110,6 +558,18 @@ class ComplaintsDB {
         if (!db.objectStoreNames.contains(DB_CONFIG.STORES.SETTINGS)) {
           db.createObjectStore(DB_CONFIG.STORES.SETTINGS, { keyPath: 'key' });
         }
+
+        // مخزن الإشعارات
+        if (!db.objectStoreNames.contains(DB_CONFIG.STORES.NOTIFICATIONS)) {
+          const notifStore = db.createObjectStore(DB_CONFIG.STORES.NOTIFICATIONS, { keyPath: 'id' });
+          notifStore.createIndex('complaintId', 'complaintId', { unique: false });
+          notifStore.createIndex('read', 'read', { unique: false });
+        }
+
+        // مخزن طابور العمليات دون اتصال
+        if (!db.objectStoreNames.contains(DB_CONFIG.STORES.OFFLINE_QUEUE)) {
+          db.createObjectStore(DB_CONFIG.STORES.OFFLINE_QUEUE, { keyPath: 'id' });
+        }
       };
     });
 
@@ -126,20 +586,49 @@ class ComplaintsDB {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     3. إدارة المستخدمين (Users)
+     8. نظام الأحداث (Event Emitter)
+     ═══════════════════════════════════════════════════════════ */
+  on(event, callback) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    this.eventListeners.get(event).push(callback);
+  }
+
+  off(event, callback) {
+    if (!this.eventListeners.has(event)) return;
+    const listeners = this.eventListeners.get(event);
+    const idx = listeners.indexOf(callback);
+    if (idx >= 0) listeners.splice(idx, 1);
+  }
+
+  emit(event, data) {
+    if (!this.eventListeners.has(event)) return;
+    this.eventListeners.get(event).forEach(cb => {
+      try { cb(data); } catch (e) { console.error(e); }
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     9. إدارة المستخدمين (Users) — محسّنة بالتشفير
      ═══════════════════════════════════════════════════════════ */
 
   /**
    * الحصول على جميع المستخدمين
    */
   async getAllUsers() {
+    const cacheKey = 'users:all';
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.USERS, 'readonly');
       const store = tx.objectStore(DB_CONFIG.STORES.USERS);
-      return await store.getAll();
+      const users = await store.getAll();
+      this.cache.set(cacheKey, users);
+      return users;
     } catch (e) {
-      // Fallback
       return JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.USERS) || '[]');
     }
   }
@@ -148,6 +637,10 @@ class ComplaintsDB {
    * الحصول على مستخدم بالبريد
    */
   async getUserByEmail(email) {
+    if (!Utils.isValidEmail(email)) {
+      throw new ValidationError('email', 'البريد الإلكتروني غير صالح');
+    }
+
     try {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.USERS, 'readonly');
@@ -160,19 +653,34 @@ class ComplaintsDB {
   }
 
   /**
-   * إضافة/تحديث مستخدم
+   * إضافة/تحديث مستخدم — مع التحقق والتشفير
    */
   async saveUser(user) {
+    // التحقق من صحة البيانات
+    const errors = Validator.validate(user, ValidationSchemas.user);
+    if (errors.length > 0) {
+      throw new DBError('VALIDATION_ERROR', errors.map(e => e.message).join(', '));
+    }
+
+    // تشفير كلمة المرور إذا كانت نصية
+    if (user.password && user.password.length < 64) {
+      user.password = await Utils.hashPassword(user.password);
+      user.passwordChangedAt = Date.now();
+    }
+
+    // إضافة الطوابع الزمنية
+    user.updatedAt = Date.now();
+    if (!user.createdAt) user.createdAt = Date.now();
+
     try {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.USERS, 'readwrite');
       const store = tx.objectStore(DB_CONFIG.STORES.USERS);
       await store.put(user);
-      // Sync to localStorage for quick access
-      this.syncUsersToLocal();
+      this.cache.invalidate('users:');
+      await this.syncUsersToLocal();
       return user;
     } catch (e) {
-      // Fallback
       let users = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.USERS) || '[]');
       const idx = users.findIndex(u => u.email === user.email);
       if (idx >= 0) users[idx] = user;
@@ -180,6 +688,49 @@ class ComplaintsDB {
       localStorage.setItem(DB_CONFIG.KEYS.USERS, JSON.stringify(users));
       return user;
     }
+  }
+
+  /**
+   * تسجيل الدخول — مع التحقق من كلمة المرور
+   */
+  async login(email, password) {
+    const user = await this.getUserByEmail(email);
+    if (!user) {
+      throw new DBError('AUTH_FAILED', 'بيانات الدخول غير صحيحة');
+    }
+
+    const isValid = await Utils.verifyPassword(password, user.password);
+    if (!isValid) {
+      throw new DBError('AUTH_FAILED', 'بيانات الدخول غير صحيحة');
+    }
+
+    // تحديث آخر تسجيل دخول
+    user.lastLogin = Date.now();
+    user.loginCount = (user.loginCount || 0) + 1;
+    await this.saveUser(user);
+
+    // إنشاء جلسة
+    const session = {
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      loginAt: Date.now(),
+      token: Utils.generateId()
+    };
+    localStorage.setItem(DB_CONFIG.KEYS.SESSION, JSON.stringify(session));
+    localStorage.setItem(DB_CONFIG.KEYS.CURRENT_USER, JSON.stringify(user));
+
+    return { user, session };
+  }
+
+  /**
+   * التحقق من الصلاحيات (RBAC)
+   */
+  hasPermission(userRole, permission) {
+    const role = DB_CONFIG.ROLES[userRole?.toUpperCase()];
+    if (!role) return false;
+    if (role.permissions.includes('*')) return true;
+    return role.permissions.includes(permission);
   }
 
   /**
@@ -191,7 +742,8 @@ class ComplaintsDB {
       const tx = this.db.transaction(DB_CONFIG.STORES.USERS, 'readwrite');
       const store = tx.objectStore(DB_CONFIG.STORES.USERS);
       await store.delete(email);
-      this.syncUsersToLocal();
+      this.cache.invalidate('users:');
+      await this.syncUsersToLocal();
       return true;
     } catch (e) {
       let users = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.USERS) || '[]');
@@ -202,7 +754,7 @@ class ComplaintsDB {
   }
 
   /**
-   * مزامنة المستخدمين إلى localStorage (للتوافق مع الصفحات الأخرى)
+   * مزامنة المستخدمين إلى localStorage
    */
   async syncUsersToLocal() {
     try {
@@ -212,22 +764,47 @@ class ComplaintsDB {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     4. إدارة الشكاوى (Complaints)
+     10. إدارة الشكاوى (Complaints) — محسّنة
      ═══════════════════════════════════════════════════════════ */
 
   /**
-   * الحصول على جميع الشكاوى
+   * الحصول على جميع الشكاوى مع Pagination
    */
-  async getAllComplaints() {
+  async getAllComplaints(page = 1, perPage = DB_CONFIG.LIMITS.MAX_COMPLAINTS_PER_PAGE) {
+    const cacheKey = `complaints:all:${page}:${perPage}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     try {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.COMPLAINTS, 'readonly');
       const store = tx.objectStore(DB_CONFIG.STORES.COMPLAINTS);
       const complaints = await store.getAll();
-      // Sort by date descending
-      return complaints.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      const sorted = complaints.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      
+      const start = (page - 1) * perPage;
+      const paginated = sorted.slice(start, start + perPage);
+      
+      const result = {
+        data: paginated,
+        total: sorted.length,
+        pages: Math.ceil(sorted.length / perPage),
+        currentPage: page,
+        perPage
+      };
+      
+      this.cache.set(cacheKey, result);
+      return result;
     } catch (e) {
-      return JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
+      const all = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
+      const start = (page - 1) * perPage;
+      return {
+        data: all.slice(start, start + perPage),
+        total: all.length,
+        pages: Math.ceil(all.length / perPage),
+        currentPage: page,
+        perPage
+      };
     }
   }
 
@@ -239,17 +816,34 @@ class ComplaintsDB {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.COMPLAINTS, 'readonly');
       const store = tx.objectStore(DB_CONFIG.STORES.COMPLAINTS);
-      return await store.get(Number(id));
+      const complaint = await store.get(Number(id));
+      
+      // إضافة بيانات SLA
+      if (complaint) {
+        complaint.sla = Utils.calculateSLA(complaint.priority, complaint.createdAt);
+      }
+      
+      return complaint;
     } catch (e) {
       const complaints = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
-      return complaints.find(c => c.id === Number(id)) || null;
+      const complaint = complaints.find(c => c.id === Number(id)) || null;
+      if (complaint) {
+        complaint.sla = Utils.calculateSLA(complaint.priority, complaint.createdAt);
+      }
+      return complaint;
     }
   }
 
   /**
-   * إضافة شكوى جديدة
+   * إضافة شكوى جديدة — مع التحقق
    */
   async addComplaint(complaint) {
+    // التحقق من صحة البيانات
+    const errors = Validator.validate(complaint, ValidationSchemas.complaint);
+    if (errors.length > 0) {
+      throw new DBError('VALIDATION_ERROR', errors.map(e => e.message).join(', '));
+    }
+
     try {
       await this.ensureReady();
       const tx = this.db.transaction(DB_CONFIG.STORES.COMPLAINTS, 'readwrite');
@@ -262,7 +856,9 @@ class ComplaintsDB {
         updatedAt: Date.now(),
         status: complaint.status || 'pending',
         replies: complaint.replies || [],
-        attachments: complaint.attachments || []
+        attachments: complaint.attachments || [],
+        feedback: null,
+        sla: Utils.calculateSLA(complaint.priority, complaint.createdAt || Date.now())
       };
 
       await store.put(newComplaint);
@@ -276,13 +872,29 @@ class ComplaintsDB {
         details: `تم إنشاء شكوى جديدة: ${complaint.title}`
       });
 
+      // إشعار
+      await this.notifications.notify('شكوى جديدة', {
+        body: `${complaint.submitter} أرسل شكوى: ${complaint.title}`,
+        complaintId: newComplaint.id,
+        tag: `complaint-${newComplaint.id}`
+      });
+
+      this.cache.invalidate('complaints:');
       await this.syncComplaintsToLocal();
       return newComplaint;
     } catch (e) {
+      if (e instanceof DBError) throw e;
+      
       // Fallback
       let complaints = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
       const newId = complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1;
-      const newComplaint = { ...complaint, id: newId, createdAt: Date.now(), updatedAt: Date.now() };
+      const newComplaint = { 
+        ...complaint, 
+        id: newId, 
+        createdAt: Date.now(), 
+        updatedAt: Date.now(),
+        feedback: null
+      };
       complaints.unshift(newComplaint);
       localStorage.setItem(DB_CONFIG.KEYS.COMPLAINTS, JSON.stringify(complaints));
       return newComplaint;
@@ -301,7 +913,12 @@ class ComplaintsDB {
       const existing = await store.get(Number(id));
       if (!existing) return null;
 
-      const updated = { ...existing, ...updates, updatedAt: Date.now() };
+      const updated = { 
+        ...existing, 
+        ...updates, 
+        updatedAt: Date.now(),
+        sla: Utils.calculateSLA(updates.priority || existing.priority, existing.createdAt)
+      };
       await store.put(updated);
 
       await this.addLog({
@@ -312,13 +929,19 @@ class ComplaintsDB {
         details: `تم تحديث الشكوى #${id}`
       });
 
+      this.cache.invalidate('complaints:');
       await this.syncComplaintsToLocal();
       return updated;
     } catch (e) {
       let complaints = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
       const idx = complaints.findIndex(c => c.id === Number(id));
       if (idx >= 0) {
-        complaints[idx] = { ...complaints[idx], ...updates, updatedAt: Date.now() };
+        complaints[idx] = { 
+          ...complaints[idx], 
+          ...updates, 
+          updatedAt: Date.now(),
+          sla: Utils.calculateSLA(updates.priority || complaints[idx].priority, complaints[idx].createdAt)
+        };
         localStorage.setItem(DB_CONFIG.KEYS.COMPLAINTS, JSON.stringify(complaints));
         return complaints[idx];
       }
@@ -344,6 +967,14 @@ class ComplaintsDB {
         timestamp: Date.now(),
         details: `تغيير الحالة من "${oldStatus}" إلى "${newStatus}"`
       });
+
+      // إشعار عند الحل
+      if (newStatus === 'resolved') {
+        await this.notifications.notify('تم حل الشكوى', {
+          body: `تم حل الشكوى #${id}: ${complaint.title}`,
+          complaintId: Number(id)
+        });
+      }
     }
     return updated;
   }
@@ -363,13 +994,47 @@ class ComplaintsDB {
       timestamp: Date.now()
     });
 
-    // إذا كانت الحالة معلقة، نغيرها تلقائياً إلى قيد المعالجة
     const updates = { replies };
     if (complaint.status === 'pending') {
       updates.status = 'in-progress';
     }
 
     return await this.updateComplaint(complaintId, updates);
+  }
+
+  /**
+   * إضافة تقييم وإغلاق الشكوى
+   */
+  async addFeedback(complaintId, rating, comment, user = 'غير معروف') {
+    if (rating < 1 || rating > 5) {
+      throw new ValidationError('rating', 'التقييم يجب أن يكون بين 1 و 5');
+    }
+
+    const feedback = {
+      rating,
+      comment,
+      user,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: Date.now()
+    };
+
+    const updated = await this.updateComplaint(complaintId, {
+      feedback,
+      status: 'closed',
+      updatedBy: user
+    });
+
+    if (updated) {
+      await this.addLog({
+        complaintId: Number(complaintId),
+        action: 'FEEDBACK',
+        user,
+        timestamp: Date.now(),
+        details: `تم إضافة تقييم ${rating}/5 للشكوى #${complaintId}`
+      });
+    }
+
+    return updated;
   }
 
   /**
@@ -380,7 +1045,6 @@ class ComplaintsDB {
       await this.ensureReady();
       const tx = this.db.transaction([DB_CONFIG.STORES.COMPLAINTS, DB_CONFIG.STORES.ATTACHMENTS], 'readwrite');
 
-      // حذف المرفقات المرتبطة
       const attStore = tx.objectStore(DB_CONFIG.STORES.ATTACHMENTS);
       const attIndex = attStore.index('complaintId');
       const attachments = await attIndex.getAll(Number(id));
@@ -388,7 +1052,6 @@ class ComplaintsDB {
         await attStore.delete(att.id);
       }
 
-      // حذف الشكوى
       const compStore = tx.objectStore(DB_CONFIG.STORES.COMPLAINTS);
       await compStore.delete(Number(id));
 
@@ -400,6 +1063,7 @@ class ComplaintsDB {
         details: `تم حذف الشكوى #${id}`
       });
 
+      this.cache.invalidate('complaints:');
       await this.syncComplaintsToLocal();
       return true;
     } catch (e) {
@@ -415,21 +1079,30 @@ class ComplaintsDB {
    */
   async syncComplaintsToLocal() {
     try {
-      const complaints = await this.getAllComplaints();
-      localStorage.setItem(DB_CONFIG.KEYS.COMPLAINTS, JSON.stringify(complaints));
+      const { data } = await this.getAllComplaints(1, 10000);
+      localStorage.setItem(DB_CONFIG.KEYS.COMPLAINTS, JSON.stringify(data));
     } catch (e) {}
   }
 
   /* ═══════════════════════════════════════════════════════════
-     5. البحث والفلترة المتقدمة
+     11. البحث والفلترة المتقدمة — مع Pagination
      ═══════════════════════════════════════════════════════════ */
 
   /**
    * بحث متقدم في الشكاوى
-   * @param {Object} filters - { search, status, priority, category, dateFrom, dateTo, email }
    */
-  async searchComplaints(filters = {}) {
-    let complaints = await this.getAllComplaints();
+  async searchComplaints(filters = {}, page = 1, perPage = DB_CONFIG.LIMITS.MAX_COMPLAINTS_PER_PAGE) {
+    const cacheKey = `search:${JSON.stringify(filters)}:${page}:${perPage}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    let complaints = [];
+    try {
+      const { data } = await this.getAllComplaints(1, 10000);
+      complaints = data;
+    } catch (e) {
+      complaints = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.COMPLAINTS) || '[]');
+    }
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
@@ -438,7 +1111,8 @@ class ComplaintsDB {
         (c.description || '').toLowerCase().includes(q) ||
         (c.submitter || '').toLowerCase().includes(q) ||
         (c.email || '').toLowerCase().includes(q) ||
-        (c.category || '').toLowerCase().includes(q)
+        (c.category || '').toLowerCase().includes(q) ||
+        (c.location || '').toLowerCase().includes(q)
       );
     }
 
@@ -456,32 +1130,119 @@ class ComplaintsDB {
       complaints = complaints.filter(c => new Date(c.date) <= to);
     }
 
-    return complaints;
+    // فلترة SLA المتأخرة
+    if (filters.overdue) {
+      complaints = complaints.filter(c => {
+        const sla = Utils.calculateSLA(c.priority, c.createdAt);
+        return sla.isOverdue && c.status !== 'resolved' && c.status !== 'closed';
+      });
+    }
+
+    const total = complaints.length;
+    const start = (page - 1) * perPage;
+    const result = {
+      data: complaints.slice(start, start + perPage),
+      total,
+      pages: Math.ceil(total / perPage),
+      currentPage: page,
+      perPage
+    };
+
+    this.cache.set(cacheKey, result);
+    return result;
   }
 
   /**
-   * إحصائيات سريعة
+   * إحصائيات شاملة
    */
   async getStats() {
-    const complaints = await this.getAllComplaints();
-    return {
-      total: complaints.length,
-      pending: complaints.filter(c => c.status === 'pending').length,
-      inProgress: complaints.filter(c => c.status === 'in-progress').length,
-      resolved: complaints.filter(c => c.status === 'resolved').length,
-      closed: complaints.filter(c => c.status === 'closed').length,
-      urgent: complaints.filter(c => c.priority === 'urgent' || c.priority === 'high').length
-    };
+    const cacheKey = 'stats:all';
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const { data: complaints } = await this.getAllComplaints(1, 10000);
+      
+      const now = Date.now();
+      const stats = {
+        total: complaints.length,
+        pending: complaints.filter(c => c.status === 'pending').length,
+        inProgress: complaints.filter(c => c.status === 'in-progress').length,
+        resolved: complaints.filter(c => c.status === 'resolved').length,
+        closed: complaints.filter(c => c.status === 'closed').length,
+        urgent: complaints.filter(c => c.priority === 'urgent' || c.priority === 'high').length,
+        
+        // إحصائيات SLA
+        overdue: complaints.filter(c => {
+          const sla = Utils.calculateSLA(c.priority, c.createdAt);
+          return sla.isOverdue && c.status !== 'resolved' && c.status !== 'closed';
+        }).length,
+        
+        // متوسط وقت الحل
+        avgResolutionTime: this.calculateAvgResolutionTime(complaints),
+        
+        // توزيع حسب التصنيف
+        byCategory: {},
+        
+        // توزيع حسب الشهر
+        byMonth: {},
+        
+        // معدل الرضا
+        satisfactionRate: this.calculateSatisfactionRate(complaints)
+      };
+
+      complaints.forEach(c => {
+        if (c.category) {
+          stats.byCategory[c.category] = (stats.byCategory[c.category] || 0) + 1;
+        }
+        const month = c.date?.substring(0, 7); // YYYY-MM
+        if (month) {
+          stats.byMonth[month] = (stats.byMonth[month] || 0) + 1;
+        }
+      });
+
+      this.cache.set(cacheKey, stats);
+      return stats;
+    } catch (e) {
+      return { total: 0, pending: 0, inProgress: 0, resolved: 0, closed: 0, urgent: 0, overdue: 0 };
+    }
+  }
+
+  calculateAvgResolutionTime(complaints) {
+    const resolved = complaints.filter(c => c.status === 'resolved' || c.status === 'closed');
+    if (resolved.length === 0) return 0;
+    
+    const totalHours = resolved.reduce((sum, c) => {
+      const created = new Date(c.createdAt).getTime();
+      const closed = new Date(c.updatedAt).getTime();
+      return sum + ((closed - created) / 3600000);
+    }, 0);
+    
+    return Math.round(totalHours / resolved.length);
+  }
+
+  calculateSatisfactionRate(complaints) {
+    const withFeedback = complaints.filter(c => c.feedback?.rating);
+    if (withFeedback.length === 0) return 0;
+    
+    const total = withFeedback.reduce((sum, c) => sum + c.feedback.rating, 0);
+    return ((total / (withFeedback.length * 5)) * 100).toFixed(1);
   }
 
   /* ═══════════════════════════════════════════════════════════
-     6. إدارة المرفقات (Attachments)
+     12. إدارة المرفقات (Attachments) — محسّنة
      ═══════════════════════════════════════════════════════════ */
 
   /**
-   * حفظ مرفق (Blob)
+   * حفظ مرفق (Blob) — مع التحقق
    */
   async saveAttachment(complaintId, file) {
+    // التحقق من المرفق
+    const errors = Validator.validate({ size: file.size, type: file.type }, ValidationSchemas.attachment);
+    if (errors.length > 0) {
+      throw new DBError('VALIDATION_ERROR', errors.map(e => e.message).join(', '));
+    }
+
     try {
       await this.ensureReady();
       return new Promise((resolve, reject) => {
@@ -492,7 +1253,7 @@ class ComplaintsDB {
             name: file.name,
             type: file.type,
             size: file.size,
-            data: reader.result, // ArrayBuffer
+            data: reader.result,
             uploadedAt: Date.now()
           };
 
@@ -501,7 +1262,7 @@ class ComplaintsDB {
           const id = await store.add(attachment);
           resolve({ ...attachment, id });
         };
-        reader.onerror = reject;
+        reader.onerror = () => reject(new DBError('FILE_READ_ERROR', 'فشل قراءة الملف'));
         reader.readAsArrayBuffer(file);
       });
     } catch (e) {
@@ -529,12 +1290,11 @@ class ComplaintsDB {
    * تحويل ArrayBuffer إلى Blob URL للعرض
    */
   static arrayBufferToBlobUrl(buffer, type) {
-    const blob = new Blob([buffer], { type });
-    return URL.createObjectURL(blob);
+    return Utils.arrayBufferToBlobUrl(buffer, type);
   }
 
   /* ═══════════════════════════════════════════════════════════
-     7. سجل الأحداث (Audit Logs)
+     13. سجل الأحداث (Audit Logs)
      ═══════════════════════════════════════════════════════════ */
 
   async addLog(logEntry) {
@@ -567,7 +1327,7 @@ class ComplaintsDB {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     8. التصدير والاستيراد (Backup & Restore)
+     14. التصدير والاستيراد (Backup & Restore) — محسّن
      ═══════════════════════════════════════════════════════════ */
 
   /**
@@ -576,12 +1336,27 @@ class ComplaintsDB {
   async exportAll() {
     const data = {
       exportedAt: new Date().toISOString(),
-      version: '2.0',
+      version: '3.0',
       users: await this.getAllUsers(),
-      complaints: await this.getAllComplaints(),
-      settings: await this.getSettings()
+      complaints: (await this.getAllComplaints(1, 10000)).data,
+      settings: await this.getSettings(),
+      stats: await this.getStats()
     };
     return JSON.stringify(data, null, 2);
+  }
+
+  /**
+   * تصدير كـ CSV
+   */
+  async exportToCSV() {
+    const { data: complaints } = await this.getAllComplaints(1, 10000);
+    const headers = ['ID', 'العنوان', 'التصنيف', 'الأولوية', 'الحالة', 'التاريخ', 'المُرسل', 'البريد', 'الموقع'];
+    const rows = complaints.map(c => [
+      c.id, c.title, c.category, c.priority, c.status, c.date, c.submitter, c.email, c.location
+    ]);
+    
+    const csv = [headers.join(','), ...rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(','))].join('\n');
+    return '\uFEFF' + csv; // BOM for Arabic Excel
   }
 
   /**
@@ -590,6 +1365,10 @@ class ComplaintsDB {
   async importAll(jsonString) {
     try {
       const data = JSON.parse(jsonString);
+      
+      if (data.version && data.version !== '3.0') {
+        console.warn('⚠️ إصدار مختلف للبيانات:', data.version);
+      }
 
       if (data.users) {
         for (const user of data.users) {
@@ -606,15 +1385,41 @@ class ComplaintsDB {
           await this.setSetting(key, value);
         }
       }
+      
+      this.cache.invalidateAll();
+      this.emit('importComplete', { count: data.complaints?.length || 0 });
       return true;
     } catch (e) {
       console.error('❌ فشل استيراد البيانات:', e);
-      return false;
+      throw new DBError('IMPORT_FAILED', 'فشل استيراد البيانات', e);
     }
   }
 
+  /**
+   * النسخ الاحتياطي التلقائي
+   */
+  startAutoBackup() {
+    if (this.autoBackupTimer) clearInterval(this.autoBackupTimer);
+    this.autoBackupTimer = setInterval(async () => {
+      try {
+        const backup = await this.exportAll();
+        localStorage.setItem('hc_autoBackup', backup);
+        localStorage.setItem('hc_autoBackupDate', new Date().toISOString());
+        console.log('✅ تم إنشاء نسخة احتياطية تلقائية');
+      } catch (e) {
+        console.error('❌ فشل النسخ الاحتياطي التلقائي:', e);
+      }
+    }, DB_CONFIG.LIMITS.AUTO_BACKUP_INTERVAL);
+  }
+
+  async restoreFromAutoBackup() {
+    const backup = localStorage.getItem('hc_autoBackup');
+    if (!backup) return false;
+    return await this.importAll(backup);
+  }
+
   /* ═══════════════════════════════════════════════════════════
-     9. الإعدادات (Settings)
+     15. الإعدادات (Settings)
      ═══════════════════════════════════════════════════════════ */
 
   async getSetting(key) {
@@ -637,7 +1442,6 @@ class ComplaintsDB {
       const store = tx.objectStore(DB_CONFIG.STORES.SETTINGS);
       await store.put({ key, value, updatedAt: Date.now() });
 
-      // Sync to localStorage
       const settings = JSON.parse(localStorage.getItem(DB_CONFIG.KEYS.SETTINGS) || '{}');
       settings[key] = value;
       localStorage.setItem(DB_CONFIG.KEYS.SETTINGS, JSON.stringify(settings));
@@ -665,12 +1469,12 @@ class ComplaintsDB {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     10. بيانات تجريبية (Seed Data)
+     16. بيانات تجريبية (Seed Data) — محسّنة
      ═══════════════════════════════════════════════════════════ */
 
   async seedDemoData() {
     const users = await this.getAllUsers();
-    if (users.length > 0) return; // لا تكرر إذا كان هناك بيانات
+    if (users.length > 0) return;
 
     const demoUsers = [
       { email: 'admin@heartcenter.sa', password: 'admin123', name: 'مدير النظام', role: 'admin', department: 'إدارة', phone: '770000001' },
@@ -698,6 +1502,7 @@ class ComplaintsDB {
         description: 'تم تأخير موعد العملية المجدول لمدة ساعتين دون إشعار مسبق. المريض في حالة انتظار منذ الساعة 8 صباحاً ولم يتم إبلاغه بأي سبب للتأخير.',
         attachments: [],
         replies: [],
+        feedback: null,
         createdAt: Date.now() - 86400000 * 6,
         updatedAt: Date.now() - 86400000 * 6
       },
@@ -717,8 +1522,9 @@ class ComplaintsDB {
         replies: [
           { from: 'مدير النظام', date: '2026-08-09', message: 'تم التواصل مع قسم النظافة ومعالجة الملاحظة. شكراً لك.', role: 'admin', timestamp: Date.now() - 86400000 * 5 }
         ],
+        feedback: { rating: 4, comment: 'شكراً للسرعة في المعالجة', user: 'فاطمة الزهراني', date: '2026-08-10', timestamp: Date.now() - 86400000 * 4 },
         createdAt: Date.now() - 86400000 * 8,
-        updatedAt: Date.now() - 86400000 * 5
+        updatedAt: Date.now() - 86400000 * 4
       },
       {
         id: 3,
@@ -736,6 +1542,7 @@ class ComplaintsDB {
         replies: [
           { from: 'د. أحمد القلبي', date: '2026-08-12', message: 'نعمل على إصلاح المشكلة التقنية. سيتم إشعاركم قريباً.', role: 'doctor', timestamp: Date.now() - 86400000 * 4 }
         ],
+        feedback: null,
         createdAt: Date.now() - 86400000 * 4,
         updatedAt: Date.now() - 86400000 * 4
       },
@@ -753,6 +1560,7 @@ class ComplaintsDB {
         description: 'لا توجد أدوية القلب الأساسية (أسبرين، بلافيكس) في الصيدلية منذ يومين. المرضى يضطرون لشرائها من خارج المستشفى.',
         attachments: [],
         replies: [],
+        feedback: null,
         createdAt: Date.now() - 86400000 * 2,
         updatedAt: Date.now() - 86400000 * 2
       },
@@ -770,6 +1578,7 @@ class ComplaintsDB {
         description: 'أحد موظفي الاستقبال (الوردية المسائية) تعامل بفظاظة مع المرضى ورفض الإجابة على استفساراتهم.',
         attachments: [],
         replies: [],
+        feedback: null,
         createdAt: Date.now() - 86400000 * 3,
         updatedAt: Date.now() - 86400000 * 3
       },
@@ -789,8 +1598,9 @@ class ComplaintsDB {
         replies: [
           { from: 'مدير النظام', date: '2026-08-06', message: 'تم زيادة عدد الأطباء في العيادات الخارجية وتحسين جدولة المواعيد. شكراً لملاحظتك.', role: 'admin', timestamp: Date.now() - 86400000 * 9 }
         ],
+        feedback: { rating: 5, comment: 'ممتاز، تحسن كبير في الانتظار', user: 'سعد الغامدي', date: '2026-08-07', timestamp: Date.now() - 86400000 * 8 },
         createdAt: Date.now() - 86400000 * 11,
-        updatedAt: Date.now() - 86400000 * 9
+        updatedAt: Date.now() - 86400000 * 8
       }
     ];
 
@@ -802,7 +1612,7 @@ class ComplaintsDB {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     11. مسح قاعدة البيانات (Reset)
+     17. مسح قاعدة البيانات (Reset)
      ═══════════════════════════════════════════════════════════ */
 
   async clearAll() {
@@ -814,19 +1624,40 @@ class ComplaintsDB {
         const store = tx.objectStore(storeName);
         await store.clear();
       }
-      // Clear localStorage too
+      
       localStorage.removeItem(DB_CONFIG.KEYS.USERS);
       localStorage.removeItem(DB_CONFIG.KEYS.COMPLAINTS);
       localStorage.removeItem(DB_CONFIG.KEYS.SETTINGS);
+      localStorage.removeItem(DB_CONFIG.KEYS.NOTIFICATIONS);
+      localStorage.removeItem('hc_autoBackup');
+      localStorage.removeItem('hc_autoBackupDate');
+      
+      this.cache.invalidateAll();
       return true;
     } catch (e) {
       return false;
     }
   }
+
+  /**
+   * إغلاق الاتصال بقاعدة البيانات
+   */
+  close() {
+    if (this.autoBackupTimer) {
+      clearInterval(this.autoBackupTimer);
+      this.autoBackupTimer = null;
+    }
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+      this.isReady = false;
+      this.initPromise = null;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   12. تصدير نسخة عامة (Singleton)
+   18. تصدير نسخة عامة (Singleton)
    ═══════════════════════════════════════════════════════════════ */
 
 const DB = new ComplaintsDB();
@@ -834,12 +1665,32 @@ const DB = new ComplaintsDB();
 // Auto-init on load
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', async () => {
-    await DB.init();
-    await DB.seedDemoData();
+    try {
+      await DB.init();
+      await DB.seedDemoData();
+    } catch (e) {
+      console.error('❌ فشل تهيئة قاعدة البيانات:', e);
+    }
+  });
+
+  // إغلاق نظيف عند مغادرة الصفحة
+  window.addEventListener('beforeunload', () => {
+    DB.close();
   });
 }
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { ComplaintsDB, DB, DB_CONFIG };
+  module.exports = { 
+    ComplaintsDB, 
+    DB, 
+    DB_CONFIG, 
+    DBError, 
+    ValidationError,
+    Utils,
+    Validator,
+    SmartCache,
+    NotificationManager,
+    OfflineQueue
+  };
 }
