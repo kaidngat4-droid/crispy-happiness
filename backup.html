@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#8B0000">
+<meta name="description" content="النسخ الاحتياطي - نظام الشكاوى الإلكتروني - مركز القلب والقسطرة القلبية">
+<title>النسخ الاحتياطي | نظام الشكاوى | مركز القلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --gold:#D4AF37; --gold-light:#F0D060; --gold-dim:rgba(212,175,55,0.18);
+  --crimson:#8B0000; --crimson-mid:#A52A2A;
+  --cyan:#00F3FF; --green:#39FF14; --red:#FF073A; --orange:#FF6B35;
+  --bg:#080b10; --surface:rgba(14,18,28,0.92);
+  --card-bg:rgba(14,18,28,0.85); --input-bg:rgba(8,11,18,0.7);
+  --txt:#ECF0F1; --txt-muted:#8a9bb0; --txt-faint:#4a5568;
+  --border:rgba(212,175,55,0.1);
+  --font:'Cairo','Tajawal',sans-serif; --font-sig:'Great Vibes',cursive;
+  --r-sm:8px; --r-md:12px; --r-lg:18px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+}
+body.light-theme {
+  --bg:#f0f2f5; --surface:rgba(255,255,255,0.92);
+  --card-bg:rgba(255,255,255,0.9); --input-bg:rgba(240,242,245,0.7);
+  --txt:#1a1a2e; --txt-muted:#4a5568; --txt-faint:#8a9bb0;
+  --border:rgba(0,0,0,0.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background 0.3s,color 0.3s}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#bgCanvas{position:fixed;inset:0;z-index:0;opacity:0.4}
+.grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(212,175,55,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none}
+body.light-theme .vignette{background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.12) 100%)}
+
+/* ===== التنبيهات ===== */
+.toast-region{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10001;display:flex;flex-direction:column;gap:8px;width:min(90vw,420px);pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--r-md);font-size:0.82rem;font-weight:700;box-shadow:var(--shadow-lg);animation:toastIn 0.4s var(--ease);backdrop-filter:blur(12px);transition:opacity 0.3s}
+.toast.success{background:rgba(57,255,20,0.1);border:1px solid rgba(57,255,20,0.3);color:var(--green)}
+.toast.error{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red)}
+.toast.warning{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.toast.info{background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.3);color:var(--cyan)}
+body.light-theme .toast.success{color:#1a7a0a}body.light-theme .toast.error{color:#c4002b}
+body.light-theme .toast.warning{color:#c24a10}body.light-theme .toast.info{color:#0a7a8a}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+/* ===== الشارات العلوية ===== */
+.top-badges{position:fixed;top:16px;left:16px;z-index:1000;display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(10,14,22,0.85);border-radius:100px;font-size:11px;font-weight:700;backdrop-filter:blur(12px)}
+.badge.secure{border:1px solid rgba(57,255,20,0.25);color:var(--green)}
+.badge.secure::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.8s ease-in-out infinite}
+.badge.version{border:1px solid var(--gold-dim);color:var(--gold);font-size:10px}
+body.light-theme .badge{background:rgba(255,255,255,0.9)}
+body.light-theme .badge.secure{color:#1a7a0a}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ===== القائمة الجانبية ===== */
+.sidebar{position:fixed;right:0;top:0;width:280px;height:100vh;height:100dvh;background:linear-gradient(180deg,#0a0e16,rgba(14,18,28,0.98));border-left:1px solid var(--border);padding:24px 0;z-index:200;overflow-y:auto;display:flex;flex-direction:column;transition:transform 0.35s var(--ease)}
+body.light-theme .sidebar{background:linear-gradient(180deg,#ffffff,rgba(248,249,252,0.98))}
+.sidebar-header{padding:0 24px 20px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sidebar-header h2{font-size:16px;color:var(--gold);display:flex;align-items:center;gap:10px}
+.sidebar-section{padding:8px 0;margin-bottom:8px}
+.sidebar-section-title{font-size:10px;font-weight:700;color:var(--txt-faint);text-transform:uppercase;letter-spacing:1px;padding:0 24px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;color:var(--txt-muted);text-decoration:none;font-size:13px;transition:all 0.2s;border-right:3px solid transparent;white-space:nowrap}
+.nav-item:hover,.nav-item.active{background:rgba(212,175,55,0.06);color:var(--gold)}
+.nav-item.active{border-right-color:var(--gold);font-weight:700}
+.nav-item i{width:20px;text-align:center;font-size:14px;flex-shrink:0}
+.user-card{margin-top:auto;padding:16px 24px;background:rgba(0,0,0,0.25);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px}
+body.light-theme .user-card{background:rgba(0,0,0,0.04)}
+.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--crimson),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-info .name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info .role{font-size:11px;color:var(--txt-muted)}
+.logout-btn{background:rgba(255,7,58,0.1);border:1px solid rgba(255,7,58,0.3);color:var(--red);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all 0.2s}
+.logout-btn:hover{background:rgba(255,7,58,0.2)}
+.theme-toggle{background:transparent;border:1px solid var(--gold-dim);color:var(--gold);font-size:15px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.theme-toggle:hover{background:rgba(212,175,55,0.1)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:150;backdrop-filter:blur(2px)}
+
+/* ===== المحتوى ===== */
+.main-content{margin-right:280px;padding:24px 28px;min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+
+.official-header{text-align:center;padding:24px 16px 20px;background:linear-gradient(180deg,rgba(139,0,0,0.15),transparent 60%);border-radius:var(--r-lg);margin-bottom:20px}
+.emblem-ring{position:relative;width:88px;height:88px;margin:0 auto 12px}
+.emblem-ring svg.ring-svg{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);animation:spinRing 12s linear infinite}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+.emblem-inner{width:88px;height:88px;border-radius:50%;background:radial-gradient(135deg,rgba(212,175,55,0.15),rgba(139,0,0,0.1));border:2px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.emblem-inner img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(212,175,55,0.6));animation:floatY 4s ease-in-out infinite;position:relative;z-index:2}
+.emblem-fallback{display:none;color:var(--gold);font-size:1.4rem;font-weight:900;position:relative;z-index:2}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.heart-wrap{position:relative;width:90px;height:90px;margin:8px auto;display:flex;align-items:center;justify-content:center}
+.heart-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px rgba(230,0,35,0.35));animation:heartPulse 1.2s ease-in-out infinite}
+.heart-fallback{display:none;font-size:46px;color:#e60023;animation:heartPulse 1.2s ease-in-out infinite}
+@keyframes heartPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.12)}40%{transform:scale(1)}60%{transform:scale(1.08)}}
+.header-title{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:0.5px}
+.header-sub{font-size:0.88rem;font-weight:700;color:rgba(212,175,55,0.75);margin-top:3px}
+.header-office{font-size:0.72rem;font-weight:500;color:var(--txt-muted);margin-top:3px}
+.header-divider{display:flex;align-items:center;gap:10px;margin:12px auto 0;max-width:280px}
+.header-divider span{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--gold-dim),transparent)}
+.header-divider i{color:var(--gold);font-size:9px;opacity:0.6}
+.yemen-flag-chip{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.yemen-flag{display:flex;flex-direction:column;width:24px;height:16px;border-radius:3px;overflow:hidden}
+.yemen-flag span{height:5.33px}
+.yemen-flag .red{background:#ce1126}.yemen-flag .white{background:#fff}.yemen-flag .black{background:#000}
+.flag-label{font-size:9px;color:var(--txt-muted);font-weight:600}
+
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.page-header h1{font-size:22px;color:var(--gold);font-weight:800;display:flex;align-items:center;gap:10px}
+.page-header h1.small{font-size:18px}
+.last-backup-chip{font-size:11px;color:var(--txt-muted);background:var(--card-bg);border:1px solid var(--border);padding:6px 14px;border-radius:100px;display:flex;align-items:center;gap:6px}
+.last-backup-chip.stale{color:var(--orange);border-color:rgba(255,107,53,0.3)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:var(--r-md);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;font-family:inherit;white-space:nowrap}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-add{background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;border:1px solid rgba(212,175,55,0.2)}
+.btn-add:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(139,0,0,0.4)}
+.btn-restore{background:rgba(57,255,20,0.1);color:var(--green);border:1px solid rgba(57,255,20,0.2)}
+.btn-restore:hover{background:rgba(57,255,20,0.2);transform:translateY(-2px)}
+.btn-danger{background:rgba(255,7,58,0.1);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+.btn-danger:hover{background:rgba(255,7,58,0.2);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--txt-muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--gold);border-color:var(--gold-dim)}
+body.light-theme .btn-restore{color:#1a7a0a}body.light-theme .btn-danger{color:#c4002b}
+
+/* ===== بطاقات الإحصائيات ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);transition:all 0.25s}
+.stat-card:hover{border-color:rgba(212,175,55,0.3);transform:translateY(-2px)}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.stat-icon.gold{background:rgba(212,175,55,0.1);color:var(--gold)}
+.stat-icon.cyan{background:rgba(0,243,255,0.1);color:var(--cyan)}
+.stat-icon.green{background:rgba(57,255,20,0.1);color:var(--green)}
+.stat-icon.purple{background:rgba(155,89,182,0.12);color:#c39bd3}
+.stat-info{min-width:0}
+.stat-value{font-size:18px;font-weight:800;color:var(--txt);line-height:1.2}
+.stat-label{font-size:11px;color:var(--txt-muted)}
+.storage-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:10px;margin-top:6px;overflow:hidden;width:110px}
+body.light-theme .storage-bar{background:rgba(0,0,0,0.08)}
+.storage-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--cyan));transition:width 0.6s var(--ease)}
+
+/* ===== بطاقات النسخ ===== */
+.backup-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px}
+.backup-card{background:var(--card-bg);border-radius:var(--r-lg);border:1px solid var(--border);padding:24px;text-align:center;backdrop-filter:blur(10px);transition:all 0.3s}
+.backup-card:hover{border-color:rgba(212,175,55,0.3);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.backup-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px}
+.backup-icon.export{background:rgba(212,175,55,0.1);color:var(--gold);border:1px solid rgba(212,175,55,0.2)}
+.backup-icon.import{background:rgba(0,243,255,0.1);color:var(--cyan);border:1px solid rgba(0,243,255,0.2)}
+.backup-icon.clear{background:rgba(255,7,58,0.1);color:var(--red);border:1px solid rgba(255,7,58,0.2)}
+.backup-card h3{font-size:15px;color:var(--gold);margin-bottom:8px;font-weight:800}
+.backup-card p{font-size:12px;color:var(--txt-muted);margin-bottom:16px;line-height:1.6}
+.drop-zone{margin-top:12px;border:1.5px dashed rgba(0,243,255,0.3);border-radius:var(--r-md);padding:12px;font-size:11px;color:var(--txt-faint);transition:all 0.25s;cursor:pointer}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--cyan);background:rgba(0,243,255,0.06);color:var(--cyan)}
+
+/* ===== سجل النسخ ===== */
+.history-list{background:var(--card-bg);border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;backdrop-filter:blur(10px)}
+.history-item{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.2s}
+body.light-theme .history-item{border-bottom-color:rgba(0,0,0,0.05)}
+.history-item:hover{background:rgba(212,175,55,0.03)}
+.history-item:last-child{border-bottom:none}
+.history-icon{width:36px;height:36px;border-radius:10px;background:rgba(212,175,55,0.1);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.history-info{flex:1;min-width:0}
+.history-name{font-weight:700;font-size:13px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-meta{font-size:11px;color:var(--txt-faint);margin-top:2px}
+.history-del{background:transparent;border:none;color:var(--txt-faint);cursor:pointer;padding:8px;border-radius:8px;font-size:13px;transition:all 0.2s;flex-shrink:0}
+.history-del:hover{color:var(--red);background:rgba(255,7,58,0.1)}
+.empty-state{text-align:center;padding:36px 20px;color:var(--txt-faint)}
+.empty-state i{font-size:34px;margin-bottom:10px;opacity:0.4}
+.empty-state .t1{font-weight:700;font-size:14px;color:var(--txt-muted)}
+.empty-state .t2{font-size:12px;margin-top:4px}
+
+/* ===== النوافذ المنبثقة ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid var(--gold-dim);border-radius:var(--r-lg);width:min(92vw,460px);max-height:86vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:translateY(16px) scale(0.97);transition:transform 0.3s var(--ease)}
+.modal-overlay.open .modal{transform:none}
+.modal-head{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}
+.modal-head .m-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.modal-head h3{font-size:15px;font-weight:800;color:var(--txt)}
+.modal-body{padding:18px 20px;font-size:13px;color:var(--txt-muted);line-height:1.7}
+.modal-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--border);justify-content:flex-start}
+.modal-actions .btn{flex:1}
+.preview-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.preview-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
+body.light-theme .preview-table td{border-bottom-color:rgba(0,0,0,0.06)}
+.preview-table td:first-child{color:var(--txt-muted)}
+.preview-table td:last-child{font-weight:700;color:var(--txt);text-align:left}
+.check-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.check-row.ok{color:var(--green)}.check-row.fail{color:var(--red)}.check-row.warn{color:var(--orange)}
+body.light-theme .check-row.ok{color:#1a7a0a}body.light-theme .check-row.fail{color:#c4002b}body.light-theme .check-row.warn{color:#c24a10}
+.confirm-input{width:100%;padding:11px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-md);color:var(--txt);font-family:inherit;font-size:14px;font-weight:700;text-align:center;margin-top:10px;transition:border-color 0.2s}
+.confirm-input:focus{outline:none;border-color:var(--red)}
+.checkbox-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 14px;background:rgba(212,175,55,0.05);border:1px solid var(--gold-dim);border-radius:var(--r-md);cursor:pointer;font-size:12px;font-weight:700;color:var(--txt);user-select:none}
+.checkbox-row input{accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
+
+/* ===== التوقيع والتذييل ===== */
+.e-signature{margin-top:20px;padding:18px;background:var(--card-bg);border-radius:var(--r-md);border:1px solid var(--border);text-align:center}
+.sig-label{font-size:10px;color:var(--txt-faint);margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.sig-label .verify-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(57,255,20,0.15);animation:blink 2s ease-in-out infinite}
+.sig-name{font-family:var(--font-sig);font-size:24px;color:var(--gold)}
+.sig-line{width:90%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);margin:4px auto}
+.sig-title{font-size:11px;color:var(--txt-muted);margin-top:8px}
+.footer-bar{width:100%;margin-top:auto;padding:12px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));color:var(--txt-faint);font-size:11px;font-weight:600;border-top:1px solid var(--border);border-radius:0 0 var(--r-md) var(--r-md)}
+body.light-theme .footer-bar{background:linear-gradient(90deg,rgba(139,0,0,0.08),rgba(255,255,255,0.9),rgba(139,0,0,0.08))}
+.mobile-toggle{display:none;position:fixed;top:16px;right:16px;z-index:1001;background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#F8E8C0;border:none;width:42px;height:42px;border-radius:10px;font-size:17px;cursor:pointer;box-shadow:var(--shadow-lg)}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(100%);width:min(300px,85vw)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.show{display:block}
+  .main-content{margin-right:0;padding:14px}
+  .mobile-toggle{display:block}
+  .official-header{padding-top:60px}
+  .top-badges{display:none}
+  .backup-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .modal-actions{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="toast-region" id="toastRegion" role="status" aria-live="polite"></div>
+
+<div class="top-badges">
+  <div class="badge secure"><i class="fas fa-shield-alt"></i>اتصال آمن · TLS 1.3</div>
+  <div class="badge version">نظام الشكاوى · v2.1 · 2026</div>
+</div>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="فتح القائمة"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- القائمة الجانبية -->
+<aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-heart-pulse" style="color:var(--red)"></i> مركز القلب</h2>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تبديل المظهر"><i class="fas fa-moon" id="themeIcon"></i></button>
+  </div>
+  <nav>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الرئيسية</div>
+      <a href="dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+      <a href="new-complaint.html" class="nav-item"><i class="fas fa-plus-circle"></i> شكوى جديدة</a>
+      <a href="complaint-detail.html" class="nav-item"><i class="fas fa-file-lines"></i> تفاصيل الشكوى</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الخدمات الطبية</div>
+      <a href="doctors.html" class="nav-item"><i class="fas fa-user-doctor"></i> الأطباء</a>
+      <a href="services.html" class="nav-item"><i class="fas fa-money-bill-wave"></i> الخدمات والأسعار</a>
+      <a href="appointments.html" class="nav-item"><i class="fas fa-calendar-check"></i> حجز المواعيد</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">التواصل</div>
+      <a href="consultations.html" class="nav-item"><i class="fas fa-comments"></i> الاستشارات الطبية</a>
+      <a href="schedule.html" class="nav-item"><i class="fas fa-clock"></i> جدول الدوام</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">الإدارة</div>
+      <a href="users.html" class="nav-item"><i class="fas fa-users-cog"></i> إدارة المستخدمين</a>
+      <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> الإعدادات</a>
+      <a href="logs.html" class="nav-item"><i class="fas fa-history"></i> سجل الأحداث</a>
+      <a href="backup.html" class="nav-item active" aria-current="page"><i class="fas fa-database"></i> النسخ الاحتياطي</a>
+    </div>
+  </nav>
+  <div class="user-card">
+    <div class="user-avatar" id="userAvatar">م</div>
+    <div class="user-info">
+      <div class="name" id="userName">--</div>
+      <div class="role" id="userRole">--</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" aria-label="تسجيل الخروج"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</aside>
+
+<!-- المحتوى الرئيسي -->
+<main class="main-content">
+
+  <header class="official-header">
+    <div class="emblem-ring">
+      <svg class="ring-svg" viewBox="0 0 104 104" fill="none" aria-hidden="true"><circle cx="52" cy="52" r="48" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="6 4"/><defs><linearGradient id="ringGrad"><stop offset="0%" stop-color="#D4AF37" stop-opacity="0.8"/><stop offset="50%" stop-color="#00F3FF" stop-opacity="0.3"/><stop offset="100%" stop-color="#D4AF37" stop-opacity="0.8"/></linearGradient></defs></svg>
+      <div class="emblem-inner">
+        <img src="images/logo.png" alt="شعار الوزارة" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="emblem-fallback" style="display:none;">🏥</div>
+      </div>
+    </div>
+    <h1 class="header-title">الجمهورية اليمنية</h1>
+    <p class="header-sub">وزارة الصحة والبيئة</p>
+    <p class="header-office">هيئة مستشفى الثورة العام — مركز القلب والقسطرة القلبية</p>
+    <div class="heart-wrap">
+      <img src="images/heart.png" alt="مركز القلب" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div class="heart-fallback" style="display:none;">❤️</div>
+    </div>
+    <div class="header-divider" aria-hidden="true"><span></span><i class="fas fa-star"></i><i class="fas fa-circle" style="font-size:5px"></i><i class="fas fa-star"></i><span></span></div>
+    <div class="yemen-flag-chip"><div class="yemen-flag" aria-hidden="true"><span class="red"></span><span class="white"></span><span class="black"></span></div><span class="flag-label">اليمن</span></div>
+  </header>
+
+  <div class="page-header">
+    <h1><i class="fas fa-database" style="color:var(--gold)"></i>النسخ الاحتياطي</h1>
+    <div class="last-backup-chip" id="lastBackupChip"><i class="fas fa-clock"></i><span id="lastBackupText">لا توجد نسخ سابقة</span></div>
+  </div>
+
+  <!-- إحصائيات البيانات -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-icon gold"><i class="fas fa-users"></i></div>
+      <div class="stat-info"><div class="stat-value" id="statUsers">0</div><div class="stat-label">المستخدمون</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cyan"><i class="fas fa-file-lines"></i></div>
+      <div class="stat-info"><div class="stat-value" id="statComplaints">0</div><div class="stat-label">الشكاوى</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-clock-rotate-left"></i></div>
+      <div class="stat-info"><div class="stat-value" id="statLogs">0</div><div class="stat-label">سجل الأحداث</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-hard-drive"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="statStorage">0 KB</div>
+        <div class="stat-label">مساحة التخزين</div>
+        <div class="storage-bar"><div class="storage-fill" id="storageFill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- عمليات النسخ -->
+  <div class="backup-grid">
+    <div class="backup-card">
+      <div class="backup-icon export"><i class="fas fa-download"></i></div>
+      <h3>تصدير البيانات</h3>
+      <p>إنشاء نسخة احتياطية كاملة ومشفّرة البصمة من جميع بيانات النظام مع سجل تحقق</p>
+      <button class="btn btn-add" onclick="exportBackup()"><i class="fas fa-file-export"></i>تصدير JSON</button>
+    </div>
+
+    <div class="backup-card">
+      <div class="backup-icon import"><i class="fas fa-upload"></i></div>
+      <h3>استيراد البيانات</h3>
+      <p>استعادة البيانات من نسخة احتياطية مع معاينة المحتوى والتحقق من السلامة قبل التطبيق</p>
+      <button class="btn btn-restore" onclick="document.getElementById('importFile').click()"><i class="fas fa-file-import"></i>استيراد JSON</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <div class="drop-zone" id="dropZone" role="button" tabindex="0">
+        <i class="fas fa-cloud-arrow-up"></i> أو اسحب ملف النسخة هنا
+      </div>
+    </div>
+
+    <div class="backup-card">
+      <div class="backup-icon clear"><i class="fas fa-trash-alt"></i></div>
+      <h3>مسح جميع البيانات</h3>
+      <p>حذف جميع البيانات نهائياً مع إمكانية تنزيل نسخة أمان تلقائية قبل المسح</p>
+      <button class="btn btn-danger" onclick="requestClearAll()"><i class="fas fa-trash"></i>مسح الكل</button>
+    </div>
+  </div>
+
+  <!-- سجل النسخ -->
+  <div class="page-header">
+    <h1 class="small"><i class="fas fa-history" style="color:var(--cyan)"></i>سجل النسخ الاحتياطي</h1>
+    <button class="btn btn-ghost" id="clearHistoryBtn" onclick="requestClearHistory()" style="display:none;font-size:12px;padding:8px 14px"><i class="fas fa-broom"></i>مسح السجل</button>
+  </div>
+
+  <div class="history-list" id="historyList"></div>
+
+  <div class="e-signature">
+    <div class="sig-label"><span class="verify-dot"></span>توقيع إلكتروني معتمد</div>
+    <div class="sig-name">Dr. Salah Al-Ahdal</div>
+    <div class="sig-line"></div>
+    <div class="sig-title">هندسة وتطوير البرمجيات الطبية</div>
+  </div>
+
+  <div class="footer-bar">© 2026 وزارة الصحة والبيئة — هيئة مستشفى الثورة العام | جميع الحقوق محفوظة</div>
+</main>
+
+<!-- نافذة منبثقة عامة -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div class="m-icon" id="modalIcon"><i class="fas fa-info-circle"></i></div>
+      <h3 id="modalTitle">--</h3>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ================== الثوابت ================== */
+const BACKUP_VERSION = '2.1';
+const STORAGE_KEYS = ['hc_users_v2', 'hc_complaints', 'hc_logs', 'hc_settings'];
+const HISTORY_KEY = 'hc_backups';
+const MAX_IMPORT_SIZE = 20 * 1024 * 1024; // 20MB حد أقصى لملف الاستيراد
+const STALE_DAYS = 7; // تنبيه إذا مرّ أكثر من 7 أيام بدون نسخة
+
+/* ================== أدوات مساعدة ================== */
+function safeParse(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null || raw === undefined) return fallback;
+    const v = JSON.parse(raw);
+    return v === null ? fallback : v;
+  } catch (e) { return fallback; }
+}
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+function formatDate(iso) {
+  try { return new Date(iso).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }); }
+  catch (e) { return iso; }
+}
+// بصمة تحقق FNV-1a — للتحقق من سلامة محتوى النسخة
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ================== التنبيهات (آمنة ضد XSS) ================== */
+function toast(message, type) {
+  type = type || 'info';
+  const region = document.getElementById('toastRegion');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+  const icon = document.createElement('i');
+  icon.className = 'fas ' + (icons[type] || icons.info);
+  const span = document.createElement('span');
+  span.textContent = message; // textContent وليس innerHTML
+  t.appendChild(icon); t.appendChild(span);
+  region.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+/* ================== نظام النوافذ المنبثقة ================== */
+let modalConfirmFn = null;
+function openModal(opts) {
+  const overlay = document.getElementById('modalOverlay');
+  const iconEl = document.getElementById('modalIcon');
+  document.getElementById('modalTitle').textContent = opts.title;
+  document.getElementById('modalBody').innerHTML = opts.bodyHTML;
+  iconEl.innerHTML = '<i class="fas ' + (opts.icon || 'fa-info-circle') + '"></i>';
+  const colors = { gold: ['rgba(212,175,55,0.12)', 'var(--gold)'], red: ['rgba(255,7,58,0.12)', 'var(--red)'], green: ['rgba(57,255,20,0.1)', 'var(--green)'], cyan: ['rgba(0,243,255,0.1)', 'var(--cyan)'] };
+  const c = colors[opts.color || 'gold'];
+  iconEl.style.background = c[0]; iconEl.style.color = c[1];
+
+  const actions = document.getElementById('modalActions');
+  actions.innerHTML = '';
+  (opts.buttons || []).forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + b.className;
+    btn.id = b.id || '';
+    btn.innerHTML = (b.icon ? '<i class="fas ' + b.icon + '"></i>' : '') + escapeHtml(b.label);
+    if (b.disabled) btn.disabled = true;
+    btn.addEventListener('click', b.onClick);
+    actions.appendChild(btn);
+  });
+  overlay.classList.add('open');
+  const firstBtn = actions.querySelector('button:not([disabled])');
+  if (firstBtn) setTimeout(() => firstBtn.focus(), 250);
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSidebar(); }
+});
+
+/* ================== المظهر والقائمة ================== */
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('hc_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeIcon').className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+}
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show', sb.classList.contains('open'));
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+function logout() {
+  localStorage.removeItem('hc_currentUser');
+  sessionStorage.removeItem('hc_session');
+  window.location.href = 'index.html';
+}
+
+/* ================== الإحصائيات ================== */
+function loadStats() {
+  const users = safeParse('hc_users_v2', []);
+  const complaints = safeParse('hc_complaints', []);
+  const logs = safeParse('hc_logs', []);
+  let totalBytes = 0;
+  STORAGE_KEYS.concat([HISTORY_KEY]).forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) totalBytes += v.length * 2; // UTF-16
+  });
+  document.getElementById('statUsers').textContent = Array.isArray(users) ? users.length : 0;
+  document.getElementById('statComplaints').textContent = Array.isArray(complaints) ? complaints.length : 0;
+  document.getElementById('statLogs').textContent = Array.isArray(logs) ? logs.length : 0;
+  document.getElementById('statStorage').textContent = formatBytes(totalBytes);
+  // نسبة الاستخدام من الحد التقريبي للمتصفح (5MB)
+  const pct = Math.min(100, (totalBytes / (5 * 1024 * 1024)) * 100);
+  document.getElementById('storageFill').style.width = Math.max(2, pct) + '%';
+}
+
+/* ================== شريحة آخر نسخة ================== */
+function updateLastBackupChip() {
+  const backups = safeParse(HISTORY_KEY, []);
+  const chip = document.getElementById('lastBackupChip');
+  const txt = document.getElementById('lastBackupText');
+  const lastExport = backups.find(b => b.type === 'export');
+  if (!lastExport) {
+    txt.textContent = 'لا توجد نسخ سابقة — يُنصح بالتصدير الآن';
+    chip.classList.add('stale');
+    return;
+  }
+  const days = Math.floor((Date.now() - new Date(lastExport.date).getTime()) / 86400000);
+  txt.textContent = 'آخر نسخة: ' + formatDate(lastExport.date) + (days > 0 ? ' (منذ ' + days + ' يوم)' : ' (اليوم)');
+  chip.classList.toggle('stale', days >= STALE_DAYS);
+}
+
+/* ================== تصدير نسخة احتياطية ================== */
+function buildBackupPayload() {
+  const payload = {
+    meta: {
+      app: 'نظام الشكاوى الإلكتروني — مركز القلب والقسطرة القلبية',
+      version: BACKUP_VERSION,
+      exportedAt: new Date().toISOString(),
+      exportedBy: (safeParse('hc_currentUser', {}) || {}).name || 'غير معروف'
+    },
+    data: {
+      users: safeParse('hc_users_v2', []),
+      complaints: safeParse('hc_complaints', []),
+      logs: safeParse('hc_logs', []),
+      settings: safeParse('hc_settings', {})
+    }
+  };
+  payload.meta.checksum = fnv1a(JSON.stringify(payload.data));
+  return payload;
+}
+
+function downloadJSON(payload, prefix) {
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = prefix + '_' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return { name: a.download, size: json.length };
+}
+
+function exportBackup(silent) {
+  try {
+    const payload = buildBackupPayload();
+    const file = downloadJSON(payload, 'backup');
+    const backups = safeParse(HISTORY_KEY, []);
+    backups.unshift({ name: file.name, date: new Date().toISOString(), size: file.size, type: 'export' });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(backups.slice(0, 50)));
+    loadHistory(); updateLastBackupChip();
+    if (!silent) toast('تم تصدير النسخة الاحتياطية بنجاح', 'success');
+    return true;
+  } catch (e) {
+    toast('فشل التصدير: ' + e.message, 'error');
+    return false;
+  }
+}
+
+/* ================== استيراد نسخة احتياطية ================== */
+function validateBackup(data) {
+  const checks = [];
+  const isObj = data && typeof data === 'object';
+  checks.push({ ok: isObj, label: 'الملف بصيغة JSON صالحة' });
+
+  // دعم الصيغة الجديدة (meta+data) والقديمة (مفاتيح مباشرة) للتوافق العكسي
+  const d = isObj ? (data.data || data) : {};
+  const hasAny = ['users', 'complaints', 'logs', 'settings'].some(k => d[k] !== undefined);
+  checks.push({ ok: hasAny, label: 'يحتوي على بيانات النظام' });
+
+  const typesOk = ['users', 'complaints', 'logs'].every(k => d[k] === undefined || Array.isArray(d[k]));
+  checks.push({ ok: typesOk, label: 'بنية البيانات سليمة' });
+
+  let checksumOk = null;
+  if (isObj && data.meta && data.meta.checksum && data.data) {
+    checksumOk = fnv1a(JSON.stringify(data.data)) === data.meta.checksum;
+    checks.push({ ok: checksumOk, label: 'بصمة التحقق (سلامة المحتوى)' });
+  } else {
+    checks.push({ ok: true, warn: true, label: 'بصمة تحقق غير موجودة (نسخة قديمة الصيغة)' });
+  }
+
+  const version = isObj && data.meta ? data.meta.version : (data.version || 'غير معروف');
+  const versionWarn = version !== BACKUP_VERSION;
+  checks.push({ ok: true, warn: versionWarn, label: 'إصدار النسخة: ' + version + (versionWarn ? ' (يختلف عن إصدار النظام ' + BACKUP_VERSION + ')' : '') });
+
+  return { checks, valid: checks.every(c => c.ok), data: d, meta: (isObj && data.meta) || null };
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  if (!/\.json$/i.test(file.name)) { toast('صيغة الملف غير مدعومة — يجب أن يكون JSON', 'error'); return; }
+  if (file.size > MAX_IMPORT_SIZE) { toast('حجم الملف يتجاوز الحد الأقصى (20MB)', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onerror = () => toast('تعذّر قراءة الملف', 'error');
+  reader.onload = function (e) {
+    let parsed;
+    try { parsed = JSON.parse(e.target.result); }
+    catch (err) { toast('فشل استيراد البيانات: ملف JSON غير صالح', 'error'); return; }
+
+    const result = validateBackup(parsed);
+    if (!result.valid) { toast('الملف ليس نسخة احتياطية صالحة لهذا النظام', 'error'); return; }
+
+    showImportPreview(file, result);
+  };
+  reader.readAsText(file);
+}
+
+function showImportPreview(file, result) {
+  const d = result.data;
+  const counts = [
+    ['المستخدمون', Array.isArray(d.users) ? d.users.length : '—'],
+    ['الشكاوى', Array.isArray(d.complaints) ? d.complaints.length : '—'],
+    ['سجل الأحداث', Array.isArray(d.logs) ? d.logs.length : '—'],
+    ['تاريخ النسخة', result.meta && result.meta.exportedAt ? formatDate(result.meta.exportedAt) : 'غير معروف'],
+    ['أنشئت بواسطة', result.meta && result.meta.exportedBy ? result.meta.exportedBy : 'غير معروف'],
+    ['حجم الملف', formatBytes(file.size)]
+  ];
+  const checksHTML = result.checks.map(c =>
+    '<div class="check-row ' + (c.ok ? (c.warn ? 'warn' : 'ok') : 'fail') + '">' +
+    '<i class="fas ' + (c.ok ? (c.warn ? 'fa-triangle-exclamation' : 'fa-circle-check') : 'fa-circle-xmark') + '"></i>' +
+    escapeHtml(c.label) + '</div>'
+  ).join('');
+  const rowsHTML = counts.map(r => '<tr><td>' + escapeHtml(r[0]) + '</td><td>' + escapeHtml(String(r[1])) + '</td></tr>').join('');
+
+  openModal({
+    title: 'معاينة النسخة قبل الاستيراد',
+    icon: 'fa-file-import',
+    color: 'cyan',
+    bodyHTML:
+      '<p>سيتم <strong style="color:var(--red)">استبدال البيانات الحالية</strong> بمحتوى هذه النسخة. راجع التفاصيل قبل المتابعة:</p>' +
+      '<table class="preview-table">' + rowsHTML + '</table>' +
+      '<div style="margin-top:8px">' + checksHTML + '</div>' +
+      '<label class="checkbox-row"><input type="checkbox" id="safetyBackupChk" checked> تنزيل نسخة أمان من البيانات الحالية قبل الاستيراد</label>',
+    buttons: [
+      {
+        label: 'تأكيد الاستيراد', className: 'btn-restore', icon: 'fa-check',
+        onClick: () => {
+          if (document.getElementById('safetyBackupChk').checked) exportBackup(true);
+          applyImport(result.data, file);
+          closeModal();
+        }
+      },
+      { label: 'إلغاء', className: 'btn-ghost', icon: 'fa-xmark', onClick: closeModal }
+    ]
+  });
+}
+
+function applyImport(d, file) {
+  try {
+    if (Array.isArray(d.users)) localStorage.setItem('hc_users_v2', JSON.stringify(d.users));
+    if (Array.isArray(d.complaints)) localStorage.setItem('hc_complaints', JSON.stringify(d.complaints));
+    if (Array.isArray(d.logs)) localStorage.setItem('hc_logs', JSON.stringify(d.logs));
+    if (d.settings && typeof d.settings === 'object') localStorage.setItem('hc_settings', JSON.stringify(d.settings));
+
+    const backups = safeParse(HISTORY_KEY, []);
+    backups.unshift({ name: file.name, date: new Date().toISOString(), size: file.size, type: 'import' });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(backups.slice(0, 50)));
+
+    loadHistory(); loadStats(); updateLastBackupChip();
+    toast('تم استيراد البيانات بنجاح', 'success');
+  } catch (e) {
+    toast('فشل تطبيق البيانات: ' + e.message, 'error');
+  }
+}
+
+/* ================== مسح جميع البيانات ================== */
+function requestClearAll() {
+  openModal({
+    title: 'مسح جميع البيانات نهائياً',
+    icon: 'fa-triangle-exclamation',
+    color: 'red',
+    bodyHTML:
+      '<p><strong style="color:var(--red)">تحذير:</strong> سيتم حذف جميع المستخدمين والشكاوى والسجلات والإعدادات <strong>نهائياً</strong> ولا يمكن التراجع عن هذا الإجراء.</p>' +
+      '<label class="checkbox-row"><input type="checkbox" id="preWipeBackupChk" checked> تنزيل نسخة أمان تلقائية قبل المسح (موصى به بشدة)</label>' +
+      '<p style="margin-top:14px">للتأكيد، اكتب كلمة <strong style="color:var(--gold)">تأكيد</strong> في الحقل التالي:</p>' +
+      '<input type="text" class="confirm-input" id="wipeConfirmInput" placeholder="تأكيد" autocomplete="off">',
+    buttons: [
+      {
+        label: 'مسح نهائي', className: 'btn-danger', icon: 'fa-trash', id: 'wipeConfirmBtn', disabled: true,
+        onClick: () => {
+          if (document.getElementById('preWipeBackupChk').checked) exportBackup(true);
+          performClearAll();
+          closeModal();
+        }
+      },
+      { label: 'إلغاء', className: 'btn-ghost', icon: 'fa-xmark', onClick: closeModal }
+    ]
+  });
+  const input = document.getElementById('wipeConfirmInput');
+  const btn = document.getElementById('wipeConfirmBtn');
+  input.addEventListener('input', () => { btn.disabled = input.value.trim() !== 'تأكيد'; });
+  setTimeout(() => input.focus(), 300);
+}
+
+function performClearAll() {
+  STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem(HISTORY_KEY);
+  loadHistory(); loadStats(); updateLastBackupChip();
+  toast('تم مسح جميع البيانات', 'success');
+}
+
+/* ================== سجل النسخ ================== */
+function loadHistory() {
+  const backups = safeParse(HISTORY_KEY, []);
+  const container = document.getElementById('historyList');
+  const clearBtn = document.getElementById('clearHistoryBtn');
+
+  if (!Array.isArray(backups) || backups.length === 0) {
+    container.innerHTML =
+      '<div class="empty-state"><i class="fas fa-box-open"></i>' +
+      '<div class="t1">لا توجد نسخ احتياطية</div>' +
+      '<div class="t2">قم بإنشاء نسخة احتياطية أولى لحماية بيانات النظام</div></div>';
+    clearBtn.style.display = 'none';
+    return;
+  }
+  clearBtn.style.display = '';
+
+  container.innerHTML = backups.map((b, i) => {
+    const isExport = b.type === 'export';
+    const icon = isExport ? 'fa-download' : 'fa-upload';
+    const label = isExport ? 'تصدير' : 'استيراد';
+    const color = isExport ? 'var(--gold)' : 'var(--cyan)';
+    return '<div class="history-item">' +
+      '<div class="history-icon" style="color:' + color + '"><i class="fas ' + icon + '"></i></div>' +
+      '<div class="history-info">' +
+        '<div class="history-name" title="' + escapeHtml(b.name) + '">' + escapeHtml(b.name) + '</div>' +
+        '<div class="history-meta">' + label + ' • ' + formatDate(b.date) + ' • ' + formatBytes(b.size || 0) + '</div>' +
+      '</div>' +
+      '<button class="history-del" onclick="deleteHistoryItem(' + i + ')" aria-label="حذف من السجل" title="حذف من السجل"><i class="fas fa-xmark"></i></button>' +
+    '</div>';
+  }).join('');
+}
+
+function deleteHistoryItem(index) {
+  const backups = safeParse(HISTORY_KEY, []);
+  backups.splice(index, 1);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(backups));
+  loadHistory(); updateLastBackupChip();
+  toast('تم حذف العنصر من السجل', 'info');
+}
+
+function requestClearHistory() {
+  openModal({
+    title: 'مسح سجل النسخ',
+    icon: 'fa-broom',
+    color: 'gold',
+    bodyHTML: '<p>سيتم مسح سجل عمليات النسخ فقط — <strong>لن تتأثر بيانات النظام</strong> (المستخدمون والشكاوى والسجلات).</p>',
+    buttons: [
+      {
+        label: 'مسح السجل', className: 'btn-danger', icon: 'fa-broom',
+        onClick: () => {
+          localStorage.removeItem(HISTORY_KEY);
+          loadHistory(); updateLastBackupChip();
+          closeModal();
+          toast('تم مسح سجل النسخ', 'success');
+        }
+      },
+      { label: 'إلغاء', className: 'btn-ghost', icon: 'fa-xmark', onClick: closeModal }
+    ]
+  });
+}
+
+/* ================== السحب والإفلات ================== */
+(function initDropZone() {
+  const dz = document.getElementById('dropZone');
+  const fileInput = document.getElementById('importFile');
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+  dz.addEventListener('drop', e => {
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    handleImportFile(file);
+  });
+  fileInput.addEventListener('change', () => { handleImportFile(fileInput.files[0]); fileInput.value = ''; });
+})();
+
+/* ================== خلفية Canvas (مع إيقاف عند إخفاء التبويب) ================== */
+(function initCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes = [], rafId = null;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function buildNodes() {
+    nodes = Array.from({ length: 50 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5,
+      color: Math.random() < 0.6 ? 'rgba(212,175,55,' : 'rgba(0,243,255,',
+      alpha: Math.random() * 0.3 + 0.1
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    nodes.forEach(n => {
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.color + n.alpha + ')'; ctx.fill();
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    });
+    rafId = requestAnimationFrame(draw);
+  }
+  function start() { if (rafId === null) rafId = requestAnimationFrame(draw); }
+  function stop() { if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } }
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+  window.addEventListener('resize', () => { resize(); buildNodes(); });
+  resize(); buildNodes(); start();
+})();
+
+/* ================== التهيئة ================== */
+function init() {
+  const currentUser = safeParse('hc_currentUser', null);
+  if (!currentUser || currentUser.role !== 'admin') {
+    toast('يجب تسجيل الدخول كمدير للوصول لهذه الصفحة', 'error');
+    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+    return;
+  }
+
+  document.getElementById('userName').textContent = currentUser.name || 'مستخدم';
+  document.getElementById('userRole').textContent = 'مدير النظام';
+  document.getElementById('userAvatar').textContent = (currentUser.name || 'م').charAt(0);
+
+  if (localStorage.getItem('hc_theme') === 'light') {
+    document.body.classList.add('light-theme');
+    document.getElementById('themeIcon').className = 'fas fa-sun';
+  }
+
+  loadStats();
+  loadHistory();
+  updateLastBackupChip();
+}
+
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+</script>
+</body>
+</html>
