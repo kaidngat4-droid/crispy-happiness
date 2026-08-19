@@ -71,7 +71,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .toast.warning{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
 .toast.info{background:rgba(0,243,255,0.07);border:1px solid rgba(0,243,255,0.25);color:var(--cyan)}
 .toast i{font-size:1rem;flex-shrink:0}
-.toast .toast-close{position:absolute;top:4px;right:4px;background:none;border:none;color:currentColor;opacity:0.5;cursor:pointer;font-size:10px;padding:4px;transition:opacity 0.2s}
+.toast .toast-close{position:absolute;top:4px;left:4px;background:none;border:none;color:currentColor;opacity:0.5;cursor:pointer;font-size:10px;padding:4px;transition:opacity 0.2s}
 .toast .toast-close:hover{opacity:1}
 @keyframes toastIn{from{opacity:0;transform:translateY(-14px) scale(0.95)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-10px)}}
@@ -104,8 +104,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 /* ═══════════════════════════════════════════════════════════════
    SIDEBAR
    ═══════════════════════════════════════════════════════════════ */
-.sidebar{position:fixed;right:0;top:72px;width:260px;height:calc(100vh - 72px);background:var(--surface);border-left:1px solid rgba(212,175,55,0.12);color:var(--txt);padding:20px 0;z-index:300;transition:transform 0.35s var(--ease);overflow-y:auto;backdrop-filter:blur(20px);box-shadow:-8px 0 32px rgba(0,0,0,0.3)}
-.sidebar-header{padding:0 20px 20px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:12px}
+.sidebar{position:fixed;right:0;top:72px;width:260px;height:calc(100vh - 72px);background:var(--surface);border-left:1px solid rgba(212,175,55,0.12);color:var(--txt);padding:20px 0;z-index:300;transition:transform 0.35s var(--ease);overflow-y:auto;backdrop-filter:blur(20px);box-shadow:-8px 0 32px rgba(0,0,0,0.3);display:flex;flex-direction:column}
+.sidebar-header{padding:0 20px 20px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:12px;flex-shrink:0}
 .sidebar-header h2{font-size:16px;display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:800}
 .nav-item{display:flex;align-items:center;gap:12px;padding:13px 20px;color:var(--txt-muted);text-decoration:none;font-size:14px;transition:all 0.25s var(--ease);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;font-weight:600;position:relative}
 .nav-item::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--cyan));border-radius:2px 0 0 2px;transform:scaleY(0);transition:transform 0.25s var(--ease)}
@@ -114,7 +114,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .nav-item i{width:20px;text-align:center;font-size:15px;transition:transform 0.3s ease}
 .nav-item:hover i{transform:scale(1.2)}
 
-.user-card{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:rgba(8,11,18,0.8);border-top:1px solid rgba(212,175,55,0.1);display:flex;align-items:center;gap:12px}
+.user-card{position:sticky;bottom:0;left:0;right:0;padding:16px 20px;background:rgba(8,11,18,0.8);border-top:1px solid rgba(212,175,55,0.1);display:flex;align-items:center;gap:12px;margin-top:auto;flex-shrink:0}
 .user-avatar{width:40px;height:40px;background:linear-gradient(135deg,rgba(139,0,0,0.4),rgba(139,0,0,0.2));border:1.5px solid rgba(212,175,55,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);font-weight:700;transition:all 0.3s ease}
 .user-avatar:hover{transform:scale(1.1);box-shadow:0 0 16px rgba(212,175,55,0.2)}
 .user-info{flex:1}
@@ -162,9 +162,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
    ═══════════════════════════════════════════════════════════════ */
 .glass-card{background:var(--surface);border:1px solid rgba(212,175,55,0.12);border-radius:var(--r-lg);padding:28px;position:relative;overflow:hidden;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 24px 64px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03),inset 0 1px 0 rgba(255,255,255,0.05);transition:all 0.3s ease}
 .glass-card:hover{box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05),inset 0 1px 0 rgba(255,255,255,0.08);transform:translateY(-2px)}
-.glass-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--r-lg);padding:1px;background:conic-gradient(from var(--angle,0deg),transparent 0%,var(--gold) 8%,transparent 18%,transparent 50%,var(--cyan) 58%,transparent 68%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 6s linear infinite;opacity:0.4;z-index:0}
-@property --angle{syntax:'<angle>';inherits:false;initial-value:0deg}
-@keyframes rotateBorder{to{--angle:360deg}}
+.glass-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--r-lg);padding:1px;background:conic-gradient(from 0deg,transparent 0%,var(--gold) 8%,transparent 18%,transparent 50%,var(--cyan) 58%,transparent 68%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 6s linear infinite;opacity:0.4;z-index:0}
+@keyframes rotateBorder{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .glass-card::after{content:'';position:absolute;top:0;right:0;width:180px;height:180px;background:radial-gradient(circle at top right,rgba(212,175,55,0.06),transparent 70%);border-radius:0 var(--r-lg) 0 0;pointer-events:none}
 
 /* Skeleton Loading */
@@ -209,7 +208,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;position:relative;z-index:1}
 .info-item{background:rgba(8,11,18,0.6);padding:14px 16px;border-radius:var(--r-sm);border:1px solid rgba(212,175,55,0.08);transition:all 0.2s ease;cursor:pointer;position:relative;overflow:hidden}
 .info-item:hover{border-color:rgba(212,175,55,0.2);background:rgba(12,16,26,0.7);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.2)}
-.info-item::after{content:'0c5';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;top:8px;left:8px;font-size:10px;color:var(--gold);opacity:0;transition:opacity 0.2s}
+.info-item::after{content:'\f0c5';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;top:8px;left:8px;font-size:10px;color:var(--gold);opacity:0;transition:opacity 0.2s}
 .info-item:hover::after{opacity:0.3}
 .info-item label{display:block;font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:700;letter-spacing:0.3px}
 .info-item span{font-size:13px;font-weight:600;color:var(--txt)}
@@ -636,10 +635,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
         <div class="reply-form-container" id="replyFormContainer">
           <div class="reply-toolbar">
             <button type="button" onclick="formatText('bold')" title="عريض"><i class="fas fa-bold"></i></button>
-            <button type="button" onclick="formatText('italic')" title="مائل"><i class="fas fa-italic"></i></button>
-            <button type="button" onclick="formatText('underline')" title="تحت خط"><i class="fas fa-underline"></i></button>
-            <button type="button" onclick="formatText('insertUnorderedList')" title="قائمة"><i class="fas fa-list-ul"></i></button>
-            <button type="button" onclick="insertLink()" title="رابط"><i class="fas fa-link"></i></button>
+               <button type="button" onclick="insertLink()" title="رابط"><i class="fas fa-link"></i></button>
             <button type="button" onclick="clearFormat()" title="إزالة التنسيق"><i class="fas fa-eraser"></i></button>
           </div>
           <div class="reply-form" id="replyForm">
@@ -761,491 +757,487 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   COMPLAINT DETAILS SYSTEM v2.0 - ENHANCED
-   All original functions preserved + New features added
+   COMPLAINT DETAILS SYSTEM v2.0 - CORRECTED & SECURE
    ═══════════════════════════════════════════════════════════════ */
-(()=>{
+(() => {
 'use strict';
 
 /* ── Configuration ── */
-const CFG=Object.freeze({
-  KEY_SESSION:'hc_session',
-  KEY_USERS:'hc_users',
-  KEY_COMPLAINTS:'hc_complaints',
-  KEY_THEME:'hc_theme',
-  KEY_VIEW_COUNT:'hc_viewCount_',
-  SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
-  RATE_LIMIT_MS: 2000, // 2 seconds between replies
+const CFG = Object.freeze({
+  KEY_SESSION: 'hc_session',
+  KEY_USERS: 'hc_users',
+  KEY_COMPLAINTS: 'hc_complaints',
+  KEY_THEME: 'hc_theme',
+  KEY_VIEW_COUNT: 'hc_viewCount_',
+  SESSION_TIMEOUT: 30 * 60 * 1000,
+  RATE_LIMIT_MS: 2000,
 });
-const ICONS={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+const ICONS = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
 
-const $=id=>document.getElementById(id);
-const D={
-  toasts:$('toastRegion'),
-  loading:$('loadingOverlay'),
-  loadingPercent:$('loadingPercent'),
-  sidebar:$('sidebar'),
-  shareMenu:$('shareMenu'),
-  confirmDialog:$('confirmDialog'),
-  sessionWarning:$('sessionWarning')
+const $ = id => document.getElementById(id);
+const D = {
+  toasts: $('toastRegion'),
+  loading: $('loadingOverlay'),
+  loadingPercent: $('loadingPercent'),
+  sidebar: $('sidebar'),
+  shareMenu: $('shareMenu'),
+  confirmDialog: $('confirmDialog'),
+  sessionWarning: $('sessionWarning')
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   THEME SYSTEM (NEW)
+   THEME SYSTEM
    ═══════════════════════════════════════════════════════════════ */
-function initTheme(){
+function initTheme() {
   const savedTheme = localStorage.getItem(CFG.KEY_THEME) || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   updateThemeIcon(savedTheme);
 }
-function toggleTheme(){
+window.toggleTheme = function() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem(CFG.KEY_THEME, next);
   updateThemeIcon(next);
   toast(next === 'dark' ? 'تم تفعيل الوضع المظلم' : 'تم تفعيل الوضع الفاتح', 'info', 2000);
-}
-function updateThemeIcon(theme){
+};
+      function updateThemeIcon(theme) {
   const icon = $('themeIcon');
-  if(icon) icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+  if (icon) icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
 initTheme();
 
 /* ═══════════════════════════════════════════════════════════════
-   CANVAS BACKGROUND (Preserved)
+   CANVAS BACKGROUND
    ═══════════════════════════════════════════════════════════════ */
-(function initCanvas(){
-  const canvas=document.getElementById('bgCanvas');
-  if(!canvas) return;
-  const ctx=canvas.getContext('2d');
-  let W,H,nodes=[];
-  const GOLD='rgba(212,175,55,';
-  const CYAN='rgba(0,243,255,';
-  const RED='rgba(139,0,0,';
+(function initCanvas() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, nodes = [];
+  const GOLD = 'rgba(212,175,55,';
+  const CYAN = 'rgba(0,243,255,';
+  const RED = 'rgba(139,0,0,';
 
-  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
-  function buildNodes(n){nodes=Array.from({length:n},()=>({
-    x:Math.random()*W,y:Math.random()*H,
-    vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35,
-    r:Math.random()*1.8+0.5,
-    color:Math.random()<0.6?GOLD:Math.random()<0.5?CYAN:RED,
-    alpha:Math.random()*0.5+0.2
-  }))}
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    for(let i=0;i<nodes.length;i++){
-      for(let j=i+1;j<nodes.length;j++){
-        const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<130){
-          const a=(1-dist/130)*0.12;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function buildNodes(n) {
+    nodes = Array.from({ length: n }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.8 + 0.5,
+      color: Math.random() < 0.6 ? GOLD : (Math.random() < 0.5 ? CYAN : RED),
+      alpha: Math.random() * 0.5 + 0.2
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 130) {
+          const a = (1 - dist / 130) * 0.12;
           ctx.beginPath();
-          ctx.strokeStyle=`${nodes[i].color}${a})`;
-          ctx.lineWidth=0.6;
-          ctx.moveTo(nodes[i].x,nodes[i].y);
-          ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle = `${nodes[i].color}${a})`;
+          ctx.lineWidth = 0.6;
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
           ctx.stroke();
         }
       }
     }
-    nodes.forEach(n=>{
+    nodes.forEach(n => {
       ctx.beginPath();
-      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-      ctx.fillStyle=`${n.color}${n.alpha})`;
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `${n.color}${n.alpha})`;
       ctx.fill();
-      n.x+=n.vx;n.y+=n.vy;
-      if(n.x<0||n.x>W)n.vx*=-1;
-      if(n.y<0||n.y>H)n.vy*=-1;
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
     });
     requestAnimationFrame(draw);
   }
-  window.addEventListener('resize',()=>{resize();buildNodes(70)});
-  resize();buildNodes(70);draw();
+  window.addEventListener('resize', () => { resize(); buildNodes(70); });
+  resize(); buildNodes(70); draw();
 })();
 
 /* ═══════════════════════════════════════════════════════════════
-   TOAST SYSTEM (Enhanced with close button & progress)
+   TOAST SYSTEM
    ═══════════════════════════════════════════════════════════════ */
-function toast(msg,type='info',ms=4000){
-  const t=document.createElement('div');
-  t.className=`toast ${type}`;
-  t.setAttribute('role','status');
-  t.innerHTML=`<i class="fas ${ICONS[type]||ICONS.info}" aria-hidden="true"></i><span>${escapeHtml(msg)}</span><button class="toast-close" onclick="this.parentElement.remove()" aria-label="إغلاق">×</button>`;
-  D.toasts.appendChild(t);
-  setTimeout(()=>{
+window.toast = function(msg, type = 'info', ms = 4000) {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.setAttribute('role', 'status');
+  t.innerHTML = `<i class="fas ${ICONS[type] || ICONS.info}" aria-hidden="true"></i><span>${escapeHtml(msg)}</span><button class="toast-close" onclick="this.parentElement.remove()" aria-label="إغلاق">×</button>`;
+  if (D.toasts) D.toasts.appendChild(t);
+  setTimeout(() => {
     t.classList.add('is-out');
-    t.addEventListener('animationend',()=>t.remove(),{once:true});
-  },ms);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   LOADING OVERLAY (Enhanced with percentage)
-   ═══════════════════════════════════════════════════════════════ */
-function showLoading(text='جاري التحميل...'){
-  D.loading.classList.add('is-active');
-  D.loading.querySelector('.loading-text').textContent = text;
-  if(D.loadingPercent) D.loadingPercent.textContent = '0%';
-}
-function hideLoading(){D.loading.classList.remove('is-active');}
-function setLoadingPercent(pct){
-  if(D.loadingPercent) D.loadingPercent.textContent = `${pct}%`;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SIGNATURE REPLAY (Preserved)
-   ═══════════════════════════════════════════════════════════════ */
-window.replaySignature=function(){
-  const sec=document.getElementById('signatureSection');
-  if(!sec)return;
-  const parent=sec.parentNode;
-  const html=sec.outerHTML;
-  sec.remove();
-  void parent.offsetWidth;
-  parent.insertAdjacentHTML('beforeend',html);
+    t.addEventListener('animationend', () => t.remove(), { once: true });
+  }, ms);
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   AUTHENTICATION (Preserved + Enhanced)
+   LOADING OVERLAY
    ═══════════════════════════════════════════════════════════════ */
-let user = null;
-try { user = JSON.parse(localStorage.getItem('hc_currentUser')); } catch(e) { user = null; }
-
-if(!user){
-  toast('يجب تسجيل الدخول أولاً','warning',2000);
-  setTimeout(()=>{window.location.href='index.html';},1500);
-} else {
-  const un=$('userName'), ur=$('userRole'), ua=$('userAvatar');
-  if(un) un.textContent=user.name||'--';
-  const roles={admin:'مدير النظام',doctor:'طبيب',nurse:'ممرض',patient:'مريض',staff:'موظف'};
-  if(ur) ur.textContent=roles[user.role]||user.role||'--';
-  if(ua) ua.textContent=(user.name||'👤').charAt(0);
-}
-
-function logout(){
-  showConfirm('تأكيد الخروج', 'هل أنت متأكد من تسجيل الخروج؟', ()=>{
-    localStorage.removeItem('hc_currentUser');
-    sessionStorage.removeItem(CFG.KEY_SESSION);
-    toast('تم تسجيل الخروج','info',2000);
-    setTimeout(()=>{window.location.href='index.html';},800);
-  });
-}
-function toggleSidebar(){D.sidebar.classList.toggle('open');}
+window.showLoading = function(text = 'جاري التحميل...') {
+  if (D.loading) {
+    D.loading.classList.add('is-active');
+    const lt = D.loading.querySelector('.loading-text');
+    if (lt) lt.textContent = text;
+    if (D.loadingPercent) D.loadingPercent.textContent = '0%';
+  }
+};
+window.hideLoading = function() { if (D.loading) D.loading.classList.remove('is-active'); };
+window.setLoadingPercent = function(pct) { if (D.loadingPercent) D.loadingPercent.textContent = `${pct}%`; };
 
 /* ═══════════════════════════════════════════════════════════════
-   SESSION MANAGEMENT (NEW)
+   SIGNATURE REPLAY
    ═══════════════════════════════════════════════════════════════ */
-let sessionTimer = null;
+window.replaySignature = function() {
+  const sec = document.getElementById('signatureSection');
+  if (!sec) return;
+  const parent = sec.parentNode;
+  const html = sec.outerHTML;
+  sec.remove();
+  void parent.offsetWidth;
+  parent.insertAdjacentHTML('beforeend', html);
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTHENTICATION
+   ═══════════════════════════════════════════════════════════════ */
+let user = null;
+try { user = JSON.parse(localStorage.getItem('hc_currentUser')); } catch (e) { user = null; }
+
+if (!user) {
+  toast('يجب تسجيل الدخول أولاً', 'warning', 2000);
+  setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+} else {
+  const un = $('userName'), ur = $('userRole'), ua = $('userAvatar');
+  if (un) un.textContent = user.name || '--';
+  const roles = { admin: 'مدير النظام', doctor: 'طبيب', nurse: 'ممرض', patient: 'مريض', staff: 'موظف' };
+  if (ur) ur.textContent = roles[user.role] || user.role || '--';
+  if (ua) ua.textContent = (user.name || '👤').charAt(0);
+}
+
+window.logout = function() {
+  showConfirm('تأكيد الخروج', 'هل أنت متأكد من تسجيل الخروج؟', () => {
+    localStorage.removeItem('hc_currentUser');
+    sessionStorage.removeItem(CFG.KEY_SESSION);
+    toast('تم تسجيل الخروج', 'info', 2000);
+    setTimeout(() => { window.location.href = 'index.html'; }, 800);
+  });
+};
+window.toggleSidebar = function() { if (D.sidebar) D.sidebar.classList.toggle('open'); };
+
+/* ═══════════════════════════════════════════════════════════════
+   SESSION MANAGEMENT
+   ═══════════════════════════════════════════════════════════════ */
 let sessionWarningTimer = null;
-
-function initSessionManagement(){
+function initSessionManagement() {
   let lastActivity = Date.now();
-
-  function resetActivity(){ lastActivity = Date.now(); }
-  ['click','keypress','scroll','mousemove'].forEach(evt=>{
-    document.addEventListener(evt, resetActivity, {passive:true});
+  function resetActivity() { lastActivity = Date.now(); }
+  ['click', 'keypress', 'scroll', 'mousemove'].forEach(evt => {
+    document.addEventListener(evt, resetActivity, { passive: true });
   });
 
-  sessionWarningTimer = setInterval(()=>{
+  sessionWarningTimer = setInterval(() => {
     const inactive = Date.now() - lastActivity;
-    if(inactive > CFG.SESSION_TIMEOUT - 5*60*1000){ // 5 min warning
-      D.sessionWarning.classList.add('is-active');
-      const mins = Math.ceil((CFG.SESSION_TIMEOUT - inactive)/60000);
-      $('sessionTimer').textContent = Math.max(0, mins);
+    if (inactive > CFG.SESSION_TIMEOUT - 5 * 60 * 1000) {
+      if (D.sessionWarning) D.sessionWarning.classList.add('is-active');
+      const st = $('sessionTimer');
+      if (st) {
+        const mins = Math.ceil((CFG.SESSION_TIMEOUT - inactive) / 60000);
+        st.textContent = Math.max(0, mins);
+      }
     }
-    if(inactive > CFG.SESSION_TIMEOUT){
+    if (inactive > CFG.SESSION_TIMEOUT) {
       localStorage.removeItem('hc_currentUser');
-      toast('انتهت الجلسة، يرجى إعادة تسجيل الدخول','warning',3000);
-      setTimeout(()=>{window.location.href='index.html';},2000);
+      toast('انتهت الجلسة، يرجى إعادة تسجيل الدخول', 'warning', 3000);
+      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
     }
   }, 30000);
 }
-function extendSession(){
-  D.sessionWarning.classList.remove('is-active');
-  toast('تم تمديد الجلسة','success',2000);
-}
-if(user) initSessionManagement();
+window.extendSession = function() {
+  if (D.sessionWarning) D.sessionWarning.classList.remove('is-active');
+  toast('تم تمديد الجلسة', 'success', 2000);
+};
+if (user) initSessionManagement();
 
 /* ═══════════════════════════════════════════════════════════════
-   COMPLAINT LOGIC (Preserved + Enhanced)
+   COMPLAINT LOGIC
    ═══════════════════════════════════════════════════════════════ */
 let complaintId = null;
-try { complaintId = parseInt(localStorage.getItem('hc_viewComplaintId')); } catch(e) { complaintId = null; }
+try { complaintId = parseInt(localStorage.getItem('hc_viewComplaintId')); } catch (e) { complaintId = null; }
 
-if(!complaintId){
-  toast('لم يتم تحديد شكوى','warning',2000);
-  setTimeout(()=>{window.location.href='dashboard.html';},1500);
+if (!complaintId) {
+  toast('لم يتم تحديد شكوى', 'warning', 2000);
+  setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
 }
 
-function getComplaints(){
-  try{return JSON.parse(localStorage.getItem('hc_complaints')||'[]');}catch(e){return[];}
+function getComplaints() {
+  try { return JSON.parse(localStorage.getItem(CFG.KEY_COMPLAINTS) || '[]'); } catch (e) { return []; }
 }
-function getComplaint(){return getComplaints().find(c=>c.id===complaintId);}
-function saveComplaints(complaints){
-  try{
-    localStorage.setItem('hc_complaints',JSON.stringify(complaints));
+function getComplaint() { return getComplaints().find(c => c.id === complaintId); }
+function saveComplaints(complaints) {
+  try {
+    localStorage.setItem(CFG.KEY_COMPLAINTS, JSON.stringify(complaints));
     return true;
-  }catch(e){
-    toast('فشل حفظ البيانات','error');
+  } catch (e) {
+    toast('فشل حفظ البيانات', 'error');
     return false;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   RENDER COMPLAINT (Enhanced with stats, QR, attachments)
+   RENDER COMPLAINT
    ═══════════════════════════════════════════════════════════════ */
-function renderComplaint(){
-  const c=getComplaint();
-  if(!c){
-    toast('الشكوى غير موجودة','error',2000);
-    setTimeout(()=>{window.location.href='dashboard.html';},1500);
+function renderComplaint() {
+  const c = getComplaint();
+  if (!c) {
+    toast('الشكوى غير موجودة', 'error', 2000);
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
     return;
   }
 
-  // Track views
   trackView(c.id);
 
-  const dt=$('detailTitle'), dm=$('detailMeta'), pb=$('priorityBadge'), sb=$('statusBadge');
-  const isub=$('infoSubmitter'), iem=$('infoEmail'), ic=$('infoCategory'), ida=$('infoDate');
-  const iph=$('infoPhone'), iloc=$('infoLocation'), db=$('descriptionBox');
+  const dt = $('detailTitle'), dm = $('detailMeta'), pb = $('priorityBadge'), sb = $('statusBadge');
+  const isub = $('infoSubmitter'), iem = $('infoEmail'), ic = $('infoCategory'), ida = $('infoDate');
+  const iph = $('infoPhone'), iloc = $('infoLocation'), db = $('descriptionBox');
 
-  if(dt) dt.innerHTML = escapeHtml(c.title||'--');
-  if(dm) dm.textContent=`رقم الشكوى: #${c.id}`;
-  if(pb){
-    const priorityNames={high:'عالية',medium:'متوسطة',low:'منخفضة'};
-    const priorityClass=c.priority||'medium';
-    pb.innerHTML=`<span class="priority-pulse ${priorityClass}"></span>${priorityNames[priorityClass]||priorityClass}`;
-    pb.className=`badge badge-${priorityClass}`;
-  }
-  if(sb){
-    const statusNames={pending:'قيد الانتظار','in-progress':'قيد المعالجة',resolved:'تم الحل',closed:'مغلقة'};
-    sb.textContent=statusNames[c.status]||c.status||'--';
-    sb.className=`badge badge-${c.status||'pending'}`;
-  }
-  if(isub) isub.textContent=c.submitter||'--';
-  if(iem) iem.textContent=c.email||'--';
-  if(ic) ic.textContent=c.category||'--';
-  if(ida) ida.textContent=c.date||'--';
-  if(iph) iph.textContent=c.phone||'غير متوفر';
-  if(iloc) iloc.textContent=c.location||'غير محدد';
-  if(db) db.textContent=c.description||'--';
+  if (dt) dt.textContent = c.title || '--';
+  if (dm) dm.textContent = `رقم الشكوى: #${c.id}`;
 
-  // Status Progress Bar
+  if (pb) {
+    const priorityNames = { high: 'عالية', medium: 'متوسطة', low: 'منخفضة' };
+    const pClass = c.priority || 'medium';
+    pb.innerHTML = `<span class="priority-pulse ${pClass}"></span>${priorityNames[pClass] || pClass}`;
+    pb.className = `badge badge-${pClass}`;
+  }
+  if (sb) {
+    const statusNames = { pending: 'قيد الانتظار', 'in-progress': 'قيد المعالجة', resolved: 'تم الحل', closed: 'مغلقة' };
+    sb.textContent = statusNames[c.status] || c.status || '--';
+    sb.className = `badge badge-${c.status || 'pending'}`;
+  }
+
+  if (isub) isub.textContent = c.submitter || '--';
+  if (iem) iem.textContent = c.email || '--';
+  if (ic) ic.textContent = c.category || '--';
+  if (ida) ida.textContent = c.date || '--';
+  if (iph) iph.textContent = c.phone || 'غير متوفر';
+  if (iloc) iloc.textContent = c.location || 'غير محدد';
+  if (db) db.textContent = c.description || '--';
+
   const progressBar = $('statusProgress');
   const progressBarInner = $('statusProgressBar');
-  if(progressBar && progressBarInner){
-    const progressMap = {pending:25,'in-progress':50,resolved:75,closed:100};
+  if (progressBar && progressBarInner) {
+    const progressMap = { pending: 25, 'in-progress': 50, resolved: 75, closed: 100 };
     const pct = progressMap[c.status] || 0;
     progressBar.style.display = 'block';
-    setTimeout(()=>{ progressBarInner.style.width = `${pct}%`; }, 300);
+    setTimeout(() => { progressBarInner.style.width = `${pct}%`; }, 300);
   }
 
-  // Status Actions
-  const actionsDiv=$('statusActions');
-  if(actionsDiv){
-    if(user&&(user.role==='admin'||user.role==='doctor'||user.role==='staff')){
-      actionsDiv.innerHTML=`
+  const actionsDiv = $('statusActions');
+  if (actionsDiv) {
+    if (user && (user.role === 'admin' || user.role === 'doctor' || user.role === 'staff')) {
+      actionsDiv.innerHTML = `
         <button class="status-btn btn-pending" onclick="updateStatus('pending')"><i class="fas fa-clock" style="margin-left:4px"></i>قيد الانتظار</button>
         <button class="status-btn btn-progress" onclick="updateStatus('in-progress')"><i class="fas fa-spinner" style="margin-left:4px"></i>قيد المعالجة</button>
         <button class="status-btn btn-resolved" onclick="updateStatus('resolved')"><i class="fas fa-check" style="margin-left:4px"></i>تم الحل</button>
         <button class="status-btn btn-closed" onclick="updateStatus('closed')"><i class="fas fa-lock" style="margin-left:4px"></i>مغلقة</button>
       `;
     } else {
-      actionsDiv.innerHTML='';
+      actionsDiv.innerHTML = '';
     }
   }
 
-  // Attachments
   renderAttachments(c.attachments);
-
-  // Replies
-  renderReplies(c.replies||[]);
-
-  // Timeline
+  renderReplies(c.replies || []);
   renderTimeline(c);
-
-  // QR Code
   generateQR(c.id);
-
-  // Stats
   renderStats(c);
-
-  // Update page title
-  document.title = `${c.title||'تفاصيل الشكوى'} | #${c.id} | نظام الشكاوى`;
+  document.title = `${c.title || 'تفاصيل الشكوى'} | #${c.id} | نظام الشكاوى`;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ATTACHMENTS RENDERER (NEW)
+   ATTACHMENTS RENDERER
    ═══════════════════════════════════════════════════════════════ */
-function renderAttachments(attachments){
+function renderAttachments(attachments) {
   const list = $('attachmentList');
-  if(!list) return;
-  if(!attachments || attachments.length === 0){
+  if (!list) return;
+  if (!attachments || attachments.length === 0) {
     list.innerHTML = '<p style="color:var(--txt-faint);font-size:13px;padding:12px;text-align:center"><i class="fas fa-inbox" style="margin-left:6px"></i>لا توجد مرفقات</p>';
     return;
   }
-  const typeIcons = {image:'fa-image',pdf:'fa-file-pdf',doc:'fa-file-word',video:'fa-video',audio:'fa-music',default:'fa-file'};
-  list.innerHTML = attachments.map(a=>{
+  const typeIcons = { image: 'fa-image', pdf: 'fa-file-pdf', doc: 'fa-file-word', video: 'fa-video', audio: 'fa-music', default: 'fa-file' };
+  list.innerHTML = attachments.map(a => {
     const icon = typeIcons[a.type] || typeIcons.default;
+    const safeUrl = encodeURI(a.url || '');
+    const safeName = escapeHtml(a.name || 'ملف');
     return `
-      <div class="attachment-item" onclick="previewAttachment('${escapeHtml(a.url)}', '${escapeHtml(a.type)}')">
+      <div class="attachment-item" onclick="previewAttachment('${safeUrl}', '${a.type || 'default'}')">
         <div class="attachment-icon"><i class="fas ${icon}"></i></div>
         <div class="attachment-info">
-          <div class="attachment-name">${escapeHtml(a.name)}</div>
-          <div class="attachment-size">${a.size || 'غير معروف'}</div>
+          <div class="attachment-name">${safeName}</div>
+          <div class="attachment-size">${escapeHtml(a.size || 'غير معروف')}</div>
         </div>
         <div class="attachment-actions">
-          <button class="attachment-action" onclick="event.stopPropagation();downloadAttachment('${escapeHtml(a.url)}')" title="تحميل"><i class="fas fa-download"></i></button>
-          <button class="attachment-action" onclick="event.stopPropagation();previewAttachment('${escapeHtml(a.url)}', '${escapeHtml(a.type)}')" title="معاينة"><i class="fas fa-eye"></i></button>
+          <button class="attachment-action" onclick="event.stopPropagation();downloadAttachment('${safeUrl}')" title="تحميل"><i class="fas fa-download"></i></button>
+          <button class="attachment-action" onclick="event.stopPropagation();previewAttachment('${safeUrl}', '${a.type || 'default'}')" title="معاينة"><i class="fas fa-eye"></i></button>
         </div>
       </div>
     `;
   }).join('');
 }
-function previewAttachment(url, type){
-  if(type === 'image'){
-    showModal('معاينة الصورة', `<img src="${url}" style="max-width:100%;border-radius:8px" alt="معاينة">`);
+window.previewAttachment = function(url, type) {
+  if (type === 'image') {
+    showModal('معاينة الصورة', `<img src="${escapeHtml(url)}" style="max-width:100%;border-radius:8px" alt="معاينة">`);
   } else {
     window.open(url, '_blank');
   }
-}
-function downloadAttachment(url){
+};
+window.downloadAttachment = function(url) {
   const a = document.createElement('a');
   a.href = url;
   a.download = '';
+  document.body.appendChild(a);
   a.click();
-  toast('جاري التحميل...','info',2000);
-}
+  document.body.removeChild(a);
+  toast('جاري التحميل...', 'info', 2000);
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   REPLIES RENDERER (Enhanced with actions & search)
+   REPLIES RENDERER
    ═══════════════════════════════════════════════════════════════ */
 let allReplies = [];
-function renderReplies(replies){
+function renderReplies(replies) {
   allReplies = replies;
-  const list=$('repliesList');
-  const count=$('replyCount');
-  const countStat=$('replyCountStat');
-  if(count) count.textContent = `(${replies.length})`;
-  if(countStat) countStat.textContent = replies.length;
+  const list = $('repliesList');
+  const count = $('replyCount');
+  const countStat = $('replyCountStat');
+  if (count) count.textContent = `(${replies.length})`;
+  if (countStat) countStat.textContent = replies.length;
 
-  if(!list) return;
-  if(replies.length===0){
-    list.innerHTML='<p style="color:var(--txt-faint);font-size:13px;padding:12px;text-align:center"><i class="fas fa-inbox" style="margin-left:6px"></i>لا توجد ردود بعد</p>';
+  if (!list) return;
+  if (replies.length === 0) {
+    list.innerHTML = '<p style="color:var(--txt-faint);font-size:13px;padding:12px;text-align:center"><i class="fas fa-inbox" style="margin-left:6px"></i>لا توجد ردود بعد</p>';
     return;
   }
-  list.innerHTML=replies.map((r,i)=>`
-    <div class="reply-item" style="animation:fadeUp 0.3s ease ${i*0.05}s both">
+  list.innerHTML = replies.map((r, i) => {
+    const safeMsg = escapeHtml(r.message || '');
+    const safeFrom = escapeHtml(r.from || '');
+    return `
+    <div class="reply-item" style="animation:fadeUp 0.3s ease ${i * 0.05}s both" data-author="${safeFrom}">
       <div class="reply-header">
-        <span class="reply-author"><i class="fas fa-user-circle" style="margin-left:4px;color:var(--gold)"></i>${escapeHtml(r.from)}</span>
-        <span class="reply-date"><i class="fas fa-clock" style="margin-left:4px;font-size:10px"></i>${r.date}</span>
+        <span class="reply-author"><i class="fas fa-user-circle" style="margin-left:4px;color:var(--gold)"></i>${safeFrom}</span>
+        <span class="reply-date"><i class="fas fa-clock" style="margin-left:4px;font-size:10px"></i>${r.date || ''}</span>
       </div>
-      <div class="reply-text">${formatReplyText(escapeHtml(r.message))}</div>
+      <div class="reply-text">${formatReplyText(safeMsg)}</div>
       <div class="reply-actions">
-        <button class="reply-action-btn" onclick="copyToClipboard('${escapeHtml(r.message)}', 'الرد')" title="نسخ"><i class="fas fa-copy"></i> نسخ</button>
-        <button class="reply-action-btn" onclick="replyToReply('${escapeHtml(r.from)}')" title="رد"><i class="fas fa-reply"></i> رد</button>
+        <button class="reply-action-btn" onclick="copyToClipboard(this.closest('.reply-item').querySelector('.reply-text').innerText, 'الرد')" title="نسخ"><i class="fas fa-copy"></i> نسخ</button>
+        <button class="reply-action-btn" onclick="replyToAuthor(this.closest('.reply-item').dataset.author)" title="رد"><i class="fas fa-reply"></i> رد</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
-function formatReplyText(text){
-  // Simple formatting for displayed replies
+function formatReplyText(text) {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/_(.+?)_/g, '<u>$1</u>')
     .replace(/`(.*?)`/g, '<code style="background:rgba(212,175,55,0.1);padding:2px 4px;border-radius:3px;font-family:monospace">$1</code>')
-    .replace(/
-/g, '<br>');
+    .replace(/\n/g, '<br>');
 }
 
-function searchReplies(){
-  const query = ($('replySearchInput')||{}).value?.toLowerCase().trim();
-  if(!query) { renderReplies(allReplies); return; }
-  const filtered = allReplies.filter(r => 
-    (r.message||'').toLowerCase().includes(query) || 
-    (r.from||'').toLowerCase().includes(query)
+window.searchReplies = function() {
+  const input = $('replySearchInput');
+  const query = input ? input.value.toLowerCase().trim() : '';
+  if (!query) { renderReplies(allReplies); return; }
+  const filtered = allReplies.filter(r =>
+    (r.message || '').toLowerCase().includes(query) ||
+    (r.from || '').toLowerCase().includes(query)
   );
   renderReplies(filtered);
-  if(filtered.length === 0){
-    $('repliesList').innerHTML = '<p style="color:var(--txt-faint);font-size:13px;padding:12px;text-align:center"><i class="fas fa-search" style="margin-left:6px"></i>لا توجد نتائج</p>';
+  const list = $('repliesList');
+  if (filtered.length === 0 && list) {
+    list.innerHTML = '<p style="color:var(--txt-faint);font-size:13px;padding:12px;text-align:center"><i class="fas fa-search" style="margin-left:6px"></i>لا توجد نتائج</p>';
   }
-}
-function clearReplySearch(){
+};
+window.clearReplySearch = function() {
   const input = $('replySearchInput');
-  if(input) input.value = '';
+  if (input) input.value = '';
   renderReplies(allReplies);
-}
-function replyToReply(author){
+};
+window.replyToAuthor = function(author) {
   const input = $('replyInput');
-  if(input){
+  if (input && author) {
     input.value = `@${author} `;
     input.focus();
   }
-}
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   TIMELINE RENDERER (Enhanced)
+   TIMELINE RENDERER
    ═══════════════════════════════════════════════════════════════ */
-function renderTimeline(c){
-  const list=$('timelineList');
-  if(!list) return;
-  const timeline=[
-    {title:'تم تقديم الشكوى',date:c.date,icon:'fa-file-alt',type:'create'},
-    ...(c.replies||[]).map(r=>({title:`رد من ${r.from}`,date:r.date,icon:'fa-reply',type:'reply'})),
-    ...(c.statusHistory||[]).map(h=>({title:`تحديث الحالة: ${h.status}`,date:h.date,icon:'fa-sync',type:'status'}))
+function renderTimeline(c) {
+  const list = $('timelineList');
+  if (!list) return;
+  const timeline = [
+    { title: 'تم تقديم الشكوى', date: c.date, icon: 'fa-file-alt', type: 'create' },
+    ...(c.replies || []).map(r => ({ title: `رد من ${r.from || ''}`, date: r.date, icon: 'fa-reply', type: 'reply' })),
+    ...(c.statusHistory || []).map(h => ({ title: `تحديث الحالة: ${h.status || ''}`, date: h.date, icon: 'fa-sync', type: 'status' }))
   ];
-  list.innerHTML=timeline.map((t,i)=>`
-    <div class="timeline-item" style="animation:slideInRight 0.3s ease ${i*0.08}s both">
+  list.innerHTML = timeline.map((t, i) => `
+    <div class="timeline-item" style="animation:slideInRight 0.3s ease ${i * 0.08}s both">
       <div class="timeline-dot"><i class="fas ${t.icon}" style="font-size:9px"></i></div>
       <div class="timeline-content">
         <div class="timeline-title">${escapeHtml(t.title)}</div>
-        <div class="timeline-date">${t.date}</div>
+        <div class="timeline-date">${escapeHtml(t.date || '')}</div>
       </div>
     </div>
   `).join('');
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   QR CODE GENERATOR (NEW)
+   QR CODE GENERATOR
    ═══════════════════════════════════════════════════════════════ */
-function generateQR(complaintId){
+function generateQR(id) {
   const canvas = $('qrCanvas');
   const qrId = $('qrId');
-  if(!canvas || !qrId) return;
-  qrId.textContent = `#${complaintId}`;
+  if (!canvas || !qrId) return;
+  qrId.textContent = `#${id}`;
 
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#080b10';
-  ctx.fillRect(0,0,100,100);
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  ctx.fillStyle = isLight ? '#ffffff' : '#080b10';
+  ctx.fillRect(0, 0, 100, 100);
 
-  // Simple QR-like pattern (placeholder - in production use a real QR library)
   const cellSize = 4;
   const margin = 8;
-  const data = `COMPLAINT:${complaintId}`;
+  const data = `COMPLAINT:${id}`;
   const hash = hashCode(data);
 
-  ctx.fillStyle = document.documentElement.getAttribute('data-theme') === 'light' ? '#000' : 'var(--gold)';
-  for(let i=0;i<21;i++){
-    for(let j=0;j<21;j++){
-      if((hash + i*j + i*i) % 7 < 3){
-        ctx.fillRect(margin + i*cellSize, margin + j*cellSize, cellSize-0.5, cellSize-0.5);
+  ctx.fillStyle = isLight ? '#000000' : '#D4AF37';
+  for (let i = 0; i < 21; i++) {
+    for (let j = 0; j < 21; j++) {
+      if ((hash + i * j + i * i) % 7 < 3) {
+        ctx.fillRect(margin + i * cellSize, margin + j * cellSize, cellSize - 0.5, cellSize - 0.5);
       }
     }
   }
 
-  // Position markers
-  ctx.fillRect(margin, margin, cellSize*3, cellSize*3);
-  ctx.fillRect(margin + cellSize, margin + cellSize, cellSize, cellSize);
-  ctx.fillRect(100-margin-cellSize*3, margin, cellSize*3, cellSize*3);
-  ctx.fillRect(100-margin-cellSize*2, margin + cellSize, cellSize, cellSize);
-  ctx.fillRect(margin, 100-margin-cellSize*3, cellSize*3, cellSize*3);
-  ctx.fillRect(margin + cellSize, 100-margin-cellSize*2, cellSize, cellSize);
+  ctx.fillRect(margin, margin, cellSize * 3, cellSize * 3);
+  ctx.clearRect(margin + cellSize, margin + cellSize, cellSize, cellSize);
+  ctx.fillRect(100 - margin - cellSize * 3, margin, cellSize * 3, cellSize * 3);
+  ctx.clearRect(100 - margin - cellSize * 2, margin + cellSize, cellSize, cellSize);
+  ctx.fillRect(margin, 100 - margin - cellSize * 3, cellSize * 3, cellSize * 3);
+  ctx.clearRect(margin + cellSize, 100 - margin - cellSize * 2, cellSize, cellSize);
 }
-function hashCode(str){
+function hashCode(str) {
   let hash = 0;
-  for(let i=0;i<str.length;i++){
+  for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) - hash) + str.charCodeAt(i);
     hash |= 0;
   }
@@ -1253,256 +1245,242 @@ function hashCode(str){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   STATISTICS (NEW)
+   STATISTICS
    ═══════════════════════════════════════════════════════════════ */
-function renderStats(c){
+function renderStats(c) {
   const viewCount = getViewCount(c.id);
   const viewEl = $('viewCount');
-  if(viewEl) viewEl.textContent = viewCount;
+  if (viewEl) viewEl.textContent = viewCount;
 
   const lastUpdate = c.lastUpdate || c.date;
   const updateEl = $('lastUpdate');
-  if(updateEl) updateEl.textContent = lastUpdate;
+  if (updateEl) updateEl.textContent = lastUpdate;
 
   const procTime = calculateProcessingTime(c.date, c.status);
   const procEl = $('processingTime');
-  if(procEl) procEl.textContent = procTime;
+  if (procEl) procEl.textContent = procTime;
 }
-function trackView(id){
+function trackView(id) {
   const key = CFG.KEY_VIEW_COUNT + id;
   let count = parseInt(localStorage.getItem(key) || '0');
   count++;
   localStorage.setItem(key, count.toString());
 }
-function getViewCount(id){
+function getViewCount(id) {
   return localStorage.getItem(CFG.KEY_VIEW_COUNT + id) || '0';
 }
-function calculateProcessingTime(startDate, status){
-  if(!startDate || status === 'pending') return 'لم تبدأ';
+function calculateProcessingTime(startDate, status) {
+  if (!startDate || status === 'pending') return 'لم تبدأ';
   const start = new Date(startDate);
   const now = new Date();
   const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-  if(diff === 0) return 'أقل من يوم';
-  if(diff === 1) return 'يوم واحد';
-  if(diff < 30) return `${diff} يوم`;
+  if (diff === 0) return 'أقل من يوم';
+  if (diff === 1) return 'يوم واحد';
+  if (diff < 30) return `${diff} يوم`;
   const months = Math.floor(diff / 30);
   return `${months} شهر`;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   STATUS UPDATE (Preserved + Enhanced with history)
+   STATUS UPDATE
    ═══════════════════════════════════════════════════════════════ */
-function updateStatus(status){
-  const statusNames={pending:'قيد الانتظار','in-progress':'قيد المعالجة',resolved:'تم الحل',closed:'مغلقة'};
-  showConfirm('تأكيد تغيير الحالة', `هل تريد تغيير الحالة إلى "${statusNames[status]}"؟`, ()=>{
-    const complaints=getComplaints();
-    const idx=complaints.findIndex(c=>c.id===complaintId);
-    if(idx!==-1){
-      // Track status history
+window.updateStatus = function(status) {
+  const statusNames = { pending: 'قيد الانتظار', 'in-progress': 'قيد المعالجة', resolved: 'تم الحل', closed: 'مغلقة' };
+  showConfirm('تأكيد تغيير الحالة', `هل تريد تغيير الحالة إلى "${statusNames[status]}"؟`, () => {
+    const complaints = getComplaints();
+    const idx = complaints.findIndex(c => c.id === complaintId);
+    if (idx !== -1) {
       complaints[idx].statusHistory = complaints[idx].statusHistory || [];
       complaints[idx].statusHistory.push({
         status: statusNames[status],
         date: new Date().toISOString().split('T')[0],
-        by: user.name
+        by: user ? user.name : 'unknown'
       });
-      complaints[idx].status=status;
+      complaints[idx].status = status;
       complaints[idx].lastUpdate = new Date().toISOString().split('T')[0];
-      if(saveComplaints(complaints)){
+      if (saveComplaints(complaints)) {
         renderComplaint();
-        toast(`تم تحديث الحالة إلى: ${statusNames[status]}`,'success');
-        // Simulate notification
-        if('Notification' in window && Notification.permission === 'granted'){
-          new Notification('تحديث الشكوى', {body:`تم تحديث حالة الشكوى #${complaintId}`});
+        toast(`تم تحديث الحالة إلى: ${statusNames[status]}`, 'success');
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification('تحديث الشكوى', { body: `تم تحديث حالة الشكوى #${complaintId}` });
+          } catch (e) { /* ignore */ }
         }
       }
     }
   });
-}
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   ADD REPLY (Preserved + Enhanced with rate limiting & formatting)
+   ADD REPLY
    ═══════════════════════════════════════════════════════════════ */
 let lastReplyTime = 0;
-function addReply(){
-  const input=$('replyInput');
-  if(!input) return;
-  const message=input.value.trim();
-  if(!message){toast('يرجى كتابة الرد أولاً','warning');return;}
+window.addReply = function() {
+  const input = $('replyInput');
+  if (!input) return;
+  const message = input.value.trim();
+  if (!message) { toast('يرجى كتابة الرد أولاً', 'warning'); return; }
 
-  // Rate limiting
   const now = Date.now();
-  if(now - lastReplyTime < CFG.RATE_LIMIT_MS){
-    toast('يرجى الانتظار قليلاً قبل إرسال رد آخر','warning');
+  if (now - lastReplyTime < CFG.RATE_LIMIT_MS) {
+    toast('يرجى الانتظار قليلاً قبل إرسال رد آخر', 'warning');
     return;
   }
   lastReplyTime = now;
 
-  // XSS protection - sanitize
   const sanitized = sanitizeInput(message);
-
-  const complaints=getComplaints();
-  const idx=complaints.findIndex(c=>c.id===complaintId);
-  if(idx!==-1){
-    complaints[idx].replies=complaints[idx].replies||[];
+  const complaints = getComplaints();
+  const idx = complaints.findIndex(c => c.id === complaintId);
+  if (idx !== -1) {
+    complaints[idx].replies = complaints[idx].replies || [];
     complaints[idx].replies.push({
-      from:user.name,
-      date:new Date().toISOString().split('T')[0],
-      message:sanitized,
+      from: user ? user.name : 'مجهول',
+      date: new Date().toISOString().split('T')[0],
+      message: sanitized,
       timestamp: Date.now()
     });
     complaints[idx].lastUpdate = new Date().toISOString().split('T')[0];
-    if(saveComplaints(complaints)){
-      input.value='';
+    if (saveComplaints(complaints)) {
+      input.value = '';
       renderComplaint();
-      toast('تم إرسال الرد بنجاح','success');
-      // Play sound
+      toast('تم إرسال الرد بنجاح', 'success');
       playSound('success');
     }
   }
-}
+};
 
-function sanitizeInput(input){
+function sanitizeInput(input) {
+  if (!input) return '';
   const div = document.createElement('div');
   div.textContent = input;
   return div.innerHTML
-    .replace(/&lt;script&gt;/gi, '')
-    .replace(/&lt;\/script&gt;/gi, '');
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '');
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   RICH TEXT EDITOR (NEW)
+   RICH TEXT EDITOR
    ═══════════════════════════════════════════════════════════════ */
-function formatText(command){
+window.formatText = function(command) {
   const textarea = $('replyInput');
-  if(!textarea) return;
+  if (!textarea) return;
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const text = textarea.value;
   const selected = text.substring(start, end);
-  if(!selected) return;
+  if (!selected) return;
 
   const formats = {
-    bold: {before:'**', after:'**'},
-    italic: {before:'*', after:'*'},
-    underline: {before:'_', after:'_'},
-    insertUnorderedList: {before:'- ', after:''}
+    bold: { before: '**', after: '**' },
+    italic: { before: '*', after: '*' },
+    underline: { before: '_', after: '_' },
+    list: { before: '- ', after: '' }
   };
   const fmt = formats[command];
-  if(!fmt) return;
+  if (!fmt) return;
 
   const newText = text.substring(0, start) + fmt.before + selected + fmt.after + text.substring(end);
   textarea.value = newText;
   textarea.focus();
   textarea.setSelectionRange(start + fmt.before.length, end + fmt.before.length);
-}
-function insertLink(){
+};
+window.insertLink = function() {
   const textarea = $('replyInput');
-  if(!textarea) return;
+  if (!textarea) return;
   const url = prompt('أدخل الرابط:');
-  if(url){
+  if (url) {
     const start = textarea.selectionStart;
     const text = textarea.value;
     textarea.value = text.substring(0, start) + `[رابط](${url})` + text.substring(start);
     textarea.focus();
   }
-}
-function clearFormat(){
+};
+window.clearFormat = function() {
   const textarea = $('replyInput');
-  if(textarea) textarea.value = textarea.value.replace(/[\*\_\`]/g, '');
-}
-function clearReplyInput(){
+  if (textarea) textarea.value = textarea.value.replace(/[*_`]/g, '');
+};
+window.clearReplyInput = function() {
   const input = $('replyInput');
-  if(input) input.value = '';
-}
+  if (input) input.value = '';
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   CLIPBOARD & COPY (NEW)
+   CLIPBOARD & COPY
    ═══════════════════════════════════════════════════════════════ */
-function copyToClipboard(text, label){
-  if(!text || text === '--' || text === 'غير متوفر' || text === 'غير محدد'){
-    toast('لا يوجد محتوى للنسخ','warning');
+window.copyToClipboard = function(text, label) {
+  if (!text || text === '--' || text === 'غير متوفر' || text === 'غير محدد' || text.includes('skeleton')) {
+    toast('لا يوجد محتوى للنسخ', 'warning');
     return;
   }
-  navigator.clipboard.writeText(text).then(()=>{
-    toast(`تم نسخ ${label || 'المحتوى'} إلى الحافظة`,'success',2000);
-  }).catch(()=>{
-    // Fallback
+  navigator.clipboard.writeText(text).then(() => {
+    toast(`تم نسخ ${label || 'المحتوى'} إلى الحافظة`, 'success', 2000);
+  }).catch(() => {
     const ta = document.createElement('textarea');
     ta.value = text;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    toast(`تم نسخ ${label || 'المحتوى'}`,'success',2000);
+    toast(`تم نسخ ${label || 'المحتوى'}`, 'success', 2000);
   });
-}
-function copyComplaintDetails(){
+};
+window.copyComplaintDetails = function() {
   const c = getComplaint();
-  if(!c) return;
-  const details = `رقم الشكوى: #${c.id}
-العنوان: ${c.title}
-المرسل: ${c.submitter}
-الحالة: ${c.status}
-الأولوية: ${c.priority}
-التاريخ: ${c.date}
-التفاصيل: ${c.description}`;
+  if (!c) return;
+  const details = `رقم الشكوى: #${c.id}\nالعنوان: ${c.title || ''}\nالمرسل: ${c.submitter || ''}\nالحالة: ${c.status || ''}\nالأولوية: ${c.priority || ''}\nالتاريخ: ${c.date || ''}\nالتفاصيل: ${c.description || ''}`;
   copyToClipboard(details, 'تفاصيل الشكوى');
-}
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   PRINT SYSTEM (NEW)
+   PRINT & EXPORT
    ═══════════════════════════════════════════════════════════════ */
-function printComplaint(){
-  window.print();
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   EXPORT SYSTEM (NEW)
-   ═══════════════════════════════════════════════════════════════ */
-function exportToJSON(){
+window.printComplaint = function() { window.print(); };
+window.exportToJSON = function() {
   const c = getComplaint();
-  if(!c) return;
+  if (!c) return;
   const data = JSON.stringify(c, null, 2);
-  const blob = new Blob([data], {type:'application/json'});
+  const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `complaint_${c.id}.json`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  toast('تم تصدير البيانات كـ JSON','success');
-}
-function exportToPDF(){
-  toast('جاري إعداد ملف PDF...','info',2000);
-  setTimeout(()=>{
-    printComplaint(); // Fallback to print dialog
-  }, 500);
-}
+  toast('تم تصدير البيانات كـ JSON', 'success');
+};
+window.exportToPDF = function() {
+  toast('جاري إعداد ملف PDF...', 'info', 2000);
+  setTimeout(() => { printComplaint(); }, 500);
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   SHARE SYSTEM (NEW)
+   SHARE SYSTEM
    ═══════════════════════════════════════════════════════════════ */
-function toggleShareMenu(event){
+window.toggleShareMenu = function(event) {
   event.stopPropagation();
   const menu = D.shareMenu;
   const btn = $('shareBtn');
-  if(!menu || !btn) return;
+  if (!menu || !btn) return;
 
-  if(menu.classList.contains('is-active')){
+  if (menu.classList.contains('is-active')) {
     menu.classList.remove('is-active');
     return;
   }
 
   const rect = btn.getBoundingClientRect();
   menu.style.top = (rect.bottom + 8) + 'px';
-  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.style.left = rect.left + 'px';
+  menu.style.right = 'auto';
   menu.classList.add('is-active');
-}
-function shareVia(platform){
+};
+window.shareVia = function(platform) {
   const c = getComplaint();
-  if(!c) return;
+  if (!c) return;
   const url = window.location.href;
-  const text = `شكوى #${c.id}: ${c.title}`;
+  const text = `شكوى #${c.id}: ${c.title || ''}`;
 
   const urls = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`,
@@ -1511,26 +1489,25 @@ function shareVia(platform){
     copy: null
   };
 
-  if(platform === 'copy'){
+  if (platform === 'copy') {
     copyToClipboard(url, 'رابط الشكوى');
-  } else if(urls[platform]){
+  } else if (urls[platform]) {
     window.open(urls[platform], '_blank');
   }
-  D.shareMenu.classList.remove('is-active');
-}
-// Close share menu on outside click
-document.addEventListener('click', (e)=>{
-  if(D.shareMenu && D.shareMenu.classList.contains('is-active') && !D.shareMenu.contains(e.target) && !e.target.closest('#shareBtn')){
+  if (D.shareMenu) D.shareMenu.classList.remove('is-active');
+};
+document.addEventListener('click', (e) => {
+  if (D.shareMenu && D.shareMenu.classList.contains('is-active') && !D.shareMenu.contains(e.target) && !(e.target.closest && e.target.closest('#shareBtn'))) {
     D.shareMenu.classList.remove('is-active');
   }
 });
 
 /* ═══════════════════════════════════════════════════════════════
-   MODAL SYSTEM (NEW)
+   MODAL SYSTEM
    ═══════════════════════════════════════════════════════════════ */
-function showModal(title, content){
+window.showModal = function(title, content) {
   const existing = document.querySelector('.modal-overlay');
-  if(existing) existing.remove();
+  if (existing) existing.remove();
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay is-active';
@@ -1546,40 +1523,35 @@ function showModal(title, content){
       </div>
     </div>
   `;
-  overlay.addEventListener('click', (e)=>{
-    if(e.target === overlay) overlay.remove();
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
   });
   document.body.appendChild(overlay);
-}
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   CONFIRM DIALOG (NEW)
+   CONFIRM DIALOG
    ═══════════════════════════════════════════════════════════════ */
-function showConfirm(title, text, onConfirm){
+let confirmCallback = null;
+window.showConfirm = function(title, text, onConfirm) {
   const dialog = D.confirmDialog;
-  if(!dialog) return;
-  $('confirmTitle').textContent = title;
-  $('confirmText').textContent = text;
-  const btn = $('confirmBtn');
-  btn.onclick = ()=>{ closeConfirm(); onConfirm(); };
+  if (!dialog) return;
+  const t = $('confirmTitle'), b = $('confirmText'), btn = $('confirmBtn');
+  if (t) t.textContent = title;
+  if (b) b.textContent = text;
+  confirmCallback = onConfirm;
+  if (btn) btn.onclick = () => { closeConfirm(); if (typeof confirmCallback === 'function') confirmCallback(); };
   dialog.classList.add('is-active');
-
-  // Close on backdrop click
-  document.addEventListener('click', function closeOnClick(e){
-    if(e.target === dialog || e.target.closest('.confirm-btn.secondary')){
-      closeConfirm();
-      document.removeEventListener('click', closeOnClick);
-    }
-  });
-}
-function closeConfirm(){
-  D.confirmDialog.classList.remove('is-active');
-}
+};
+window.closeConfirm = function() {
+  if (D.confirmDialog) D.confirmDialog.classList.remove('is-active');
+  confirmCallback = null;
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   SECURITY INFO (NEW)
+   SECURITY INFO
    ═══════════════════════════════════════════════════════════════ */
-function showSecurityInfo(){
+window.showSecurityInfo = function() {
   showModal('معلومات الأمان', `
     <div style="text-align:center;padding:16px">
       <i class="fas fa-shield-alt" style="font-size:48px;color:var(--green);margin-bottom:16px;display:block"></i>
@@ -1588,12 +1560,12 @@ function showSecurityInfo(){
       <p style="margin-top:8px;font-size:12px;color:var(--txt-faint)">الجلسة مشفرة بالكامل</p>
       <div style="margin-top:16px;padding:12px;background:rgba(57,255,20,0.05);border-radius:8px;border:1px solid rgba(57,255,20,0.1)">
         <div style="font-size:11px;color:var(--txt-muted)">معرف الجلسة</div>
-        <div style="font-family:monospace;font-size:12px;margin-top:4px;color:var(--green)">${Math.random().toString(36).substring(2,15).toUpperCase()}</div>
+        <div style="font-family:monospace;font-size:12px;margin-top:4px;color:var(--green)">${Math.random().toString(36).substring(2, 15).toUpperCase()}</div>
       </div>
     </div>
   `);
-}
-function showVersionInfo(){
+};
+window.showVersionInfo = function() {
   showModal('معلومات النظام', `
     <div style="padding:16px">
       <div style="text-align:center;margin-bottom:20px">
@@ -1611,24 +1583,26 @@ function showVersionInfo(){
       </div>
     </div>
   `);
-}
+};
 
 /* ═══════════════════════════════════════════════════════════════
-   SOUND NOTIFICATIONS (NEW)
+   SOUND NOTIFICATIONS
    ═══════════════════════════════════════════════════════════════ */
-function playSound(type){
-  try{
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    if(type === 'success'){
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
-      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
-    } else if(type === 'error'){
+    if (type === 'success') {
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+    } else if (type === 'error') {
       osc.frequency.setValueAtTime(300, ctx.currentTime);
       osc.frequency.setValueAtTime(250, ctx.currentTime + 0.15);
     }
@@ -1638,72 +1612,67 @@ function playSound(type){
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.3);
-  }catch(e){/* Audio not supported */}
+  } catch (e) { /* Audio not supported */ }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   BROWSER NOTIFICATIONS (NEW)
+   BROWSER NOTIFICATIONS
    ═══════════════════════════════════════════════════════════════ */
-if('Notification' in window && Notification.permission === 'default'){
-  Notification.requestPermission();
+if ('Notification' in window && Notification.permission === 'default') {
+  try { Notification.requestPermission(); } catch (e) { /* ignore */ }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   UTILITY FUNCTIONS (Preserved)
+   UTILITY FUNCTIONS
    ═══════════════════════════════════════════════════════════════ */
-function escapeHtml(t){
-  if(!t) return '';
-  const d=document.createElement('div');
-  d.textContent=t;
+function escapeHtml(t) {
+  if (t == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(t);
   return d.innerHTML;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   KEYBOARD SHORTCUTS (Enhanced)
+   KEYBOARD SHORTCUTS
    ═══════════════════════════════════════════════════════════════ */
-document.addEventListener('keydown', e=>{
-  // Ctrl/Cmd + P = Print
-  if((e.ctrlKey||e.metaKey)&&e.key==='p'){e.preventDefault();printComplaint();}
-  // Ctrl/Cmd + S = Export JSON
-  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();exportToJSON();}
-  // Escape = Close modals/sidebar
-  if(e.key==='Escape'){
-    D.sidebar.classList.remove('open');
-    D.shareMenu.classList.remove('is-active');
-    const modals = document.querySelectorAll('.modal-overlay');
-    modals.forEach(m=>m.remove());
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); printComplaint(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); exportToJSON(); }
+  if (e.key === 'Escape') {
+    if (D.sidebar) D.sidebar.classList.remove('open');
+    if (D.shareMenu) D.shareMenu.classList.remove('is-active');
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
     closeConfirm();
   }
-  // Enter in reply input
-  if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='replyInput'&&!e.shiftKey){
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'replyInput' && !e.shiftKey) {
     e.preventDefault();
     addReply();
   }
 });
 
 /* ═══════════════════════════════════════════════════════════════
-   MOBILE SIDEBAR CLOSE (Preserved)
+   MOBILE SIDEBAR CLOSE
    ═══════════════════════════════════════════════════════════════ */
-document.addEventListener('click', function(e){
-  if(window.innerWidth<=900&&D.sidebar&&D.sidebar.classList.contains('open')){
-    if(!D.sidebar.contains(e.target)&&!e.target.closest('.mobile-toggle')){
+document.addEventListener('click', function(e) {
+  if (window.innerWidth <= 900 && D.sidebar && D.sidebar.classList.contains('open')) {
+    if (!D.sidebar.contains(e.target) && !e.target.closest('.mobile-toggle')) {
       D.sidebar.classList.remove('open');
     }
   }
 });
 
 /* ═══════════════════════════════════════════════════════════════
-   INIT (Enhanced with simulated loading)
+   INIT
    ═══════════════════════════════════════════════════════════════ */
-if(user&&complaintId){
+if (user && complaintId) {
   showLoading('جاري تحميل تفاصيل الشكوى...');
   let progress = 0;
-  const loadInterval = setInterval(()=>{
+  const loadInterval = setInterval(() => {
     progress += 20;
     setLoadingPercent(progress);
-    if(progress >= 100){
+    if (progress >= 100) {
       clearInterval(loadInterval);
-      setTimeout(()=>{
+      setTimeout(() => {
         hideLoading();
         renderComplaint();
       }, 300);
@@ -1711,9 +1680,9 @@ if(user&&complaintId){
   }, 100);
 }
 
-console.log('%c🔒 نظام الشكاوى v2.0 — تفاصيل الشكوى (محسّن)','color:#D4AF37;font-size:14px;font-weight:900;');
-console.log('%c✨ الميزات الجديدة: طباعة، تصدير، QR Code، بحث في الردود، إحصائيات، إدارة الجلسة، وضع فاتح/مظلم','color:#00F3FF;font-size:11px;');
+console.log('%c🔒 نظام الشكاوى v2.0 — تفاصيل الشكوى (مصحح)', 'color:#D4AF37;font-size:14px;font-weight:900;');
+console.log('%c✨ التصحيحات: XSS protection, rate limiting, secure event handling, memory leaks fixed', 'color:#00F3FF;font-size:11px;');
 })();
 </script>
 </body>
-</html>
+                                     </html>
