@@ -8,7 +8,12 @@
   "background_color": "#080b10",
   "theme_color": "#8B0000",
   "orientation": "portrait-primary",
-  "categories": ["medical", "health", "government", "productivity"],
+  "categories": [
+    "medical",
+    "health",
+    "government",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "images/logo.png",
@@ -61,5 +66,10 @@
   ],
   "lang": "ar",
   "dir": "rtl",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "display_override": [
+    "minimal-ui",
+    "window-controls-overlay",
+    "standalone"
+  ]
 }
