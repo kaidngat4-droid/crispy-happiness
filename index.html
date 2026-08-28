@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-  <link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="description" content="نظام الشكاوى الإلكتروني - مركز القلب والقسطرة القلبية - الجمهورية اليمنية">
 <meta name="author" content="د/صلاح الأهدل - وزارة الصحة والبيئة">
@@ -10,7 +10,7 @@
 <title>تسجيل الدخول | نظام الشكاوى | مركز القلب</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Comic+Neue:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 :root {
@@ -20,7 +20,7 @@
   --green:#39FF14; --red:#FF073A; --orange:#FF6B35;
   --bg:#080b10; --surface:rgba(14,18,28,0.92); --surface-hover:rgba(20,25,38,0.95); --input-bg:rgba(8,11,18,0.7);
   --txt:#ECF0F1; --txt-muted:#8a9bb0; --txt-faint:#4a5568;
-  --font:'Cairo','Tajawal',sans-serif; --font-ruqaa:'Aref Ruqaa',serif; --font-sig:'Great Vibes',cursive;
+  --font:'Cairo','Tajawal',sans-serif; --font-naskh:'Noto Naskh Arabic','Amiri',serif; --font-ruqaa:'Aref Ruqaa',serif; --font-sig:'Great Vibes',cursive;
   --r-sm:10px; --r-md:14px; --r-lg:22px; --r-xl:28px; --ease:cubic-bezier(0.22,1,0.36,1);
   --transition:0.3s ease;
 }
@@ -92,9 +92,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .heart-fallback{display:none;font-size:48px;color:#e60023;animation:heartPulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(230,0,35,0.4))}
 @keyframes heartPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.12)}40%{transform:scale(1)}60%{transform:scale(1.08)}}
 
-.header-title{font-size:1.45rem;font-weight:900;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 24px rgba(212,175,55,0.4);line-height:1.2}
-.header-sub{font-size:0.95rem;font-weight:700;color:rgba(212,175,55,0.75);margin-top:3px}
-.header-office{font-size:0.75rem;font-weight:500;color:var(--txt-muted);margin-top:2px}
+.header-title{font-family:var(--font-naskh);font-size:1.45rem;font-weight:700;color:var(--gold);letter-spacing:0.5px;text-shadow:0 0 24px rgba(212,175,55,0.4);line-height:1.2}
+.header-sub{font-family:var(--font-naskh);font-size:0.95rem;font-weight:600;color:rgba(212,175,55,0.75);margin-top:3px}
+.header-office{font-family:var(--font-naskh);font-size:0.75rem;font-weight:500;color:var(--txt-muted);margin-top:2px}
 .header-divider{display:flex;align-items:center;gap:10px;margin:14px 0 0}
 .header-divider span{flex:1;height:1px;background:linear-gradient(to left,transparent,var(--gold-dim),transparent)}
 .header-divider i{color:var(--gold);font-size:10px;opacity:0.6}
@@ -107,17 +107,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);min-height:10
 .flag-label{font-size:10px;color:var(--txt-muted);font-weight:600;letter-spacing:0.5px}
 
 .login-card{background:var(--surface);border:1px solid rgba(212,175,55,0.12);border-radius:var(--r-lg);padding:32px 28px 28px;position:relative;overflow:hidden;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03),inset 0 1px 0 rgba(255,255,255,0.05);transition:background var(--transition)}
-.login-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--r-lg);padding:1px;background:conic-gradient(from var(--angle,0deg),transparent 0%,var(--gold) 10%,transparent 20%,transparent 50%,var(--cyan) 60%,transparent 70%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 6s linear infinite;opacity:0.5;z-index:0}
-@property --angle{syntax:'<angle>';inherits:false;initial-value:0deg}
-@keyframes rotateBorder{to{--angle:360deg}}
+.login-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--r-lg);padding:1px;background:conic-gradient(from 0deg,transparent 0%,var(--gold) 10%,transparent 20%,transparent 50%,var(--cyan) 60%,transparent 70%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 6s linear infinite;opacity:0.5;z-index:0}
+@keyframes rotateBorder{to{transform:rotate(360deg)}}
 .login-card::after{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle at top right,rgba(212,175,55,0.06),transparent 70%);border-radius:0 var(--r-lg) 0 0;pointer-events:none}
 
 .card-icon-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;position:relative;z-index:1}
 .card-icon{width:52px;height:52px;background:linear-gradient(135deg,rgba(139,0,0,0.3),rgba(139,0,0,0.1));border:1px solid rgba(139,0,0,0.4);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--gold);box-shadow:0 0 20px rgba(139,0,0,0.2),inset 0 0 10px rgba(212,175,55,0.05);animation:iconPulse 3s ease-in-out infinite}
 @keyframes iconPulse{0%,100%{box-shadow:0 0 20px rgba(139,0,0,0.2),inset 0 0 10px rgba(212,175,55,0.05)}50%{box-shadow:0 0 35px rgba(139,0,0,0.4),inset 0 0 15px rgba(212,175,55,0.1)}}
 .card-title-block{text-align:right}
-.card-title-block h2{font-size:1.15rem;font-weight:800;color:var(--gold);line-height:1.2}
-.card-title-block p{font-size:0.72rem;color:var(--txt-muted);margin-top:2px;line-height:1.4}
+.card-title-block h2{font-family:var(--font-naskh);font-size:1.15rem;font-weight:700;color:var(--gold);line-height:1.2}
+.card-title-block p{font-family:var(--font-naskh);font-size:0.72rem;color:var(--txt-muted);margin-top:2px;line-height:1.4}
 
 .login-progress{height:3px;background:rgba(255,255,255,0.05);border-radius:100px;margin-bottom:22px;overflow:hidden;position:relative;z-index:1}
 .login-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--crimson),var(--gold),var(--cyan));border-radius:100px;transition:width 0.4s var(--ease);box-shadow:0 0 10px var(--gold-glow)}
@@ -194,7 +193,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 .sig-nib{fill:url(#goldGrad);r:5;opacity:0;animation:sigNib 0.3s ease forwards 3.6s}
 @keyframes sigNib{to{opacity:1}}
 .sig-line{width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);margin:10px auto 0;border-radius:2px;opacity:0;animation:sigFadeUp 0.6s ease forwards 2.6s}
-.sig-title{font-size:0.8rem;color:var(--txt-muted);margin-top:12px;font-weight:600;text-align:center;opacity:0;animation:sigFadeUp 0.6s ease forwards 3.0s}
+.sig-title{font-family:var(--font-naskh);font-size:0.8rem;color:var(--txt-muted);margin-top:12px;font-weight:600;text-align:center;opacity:0;animation:sigFadeUp 0.6s ease forwards 3.0s}
 .sig-stamp{position:absolute;top:14px;left:18px;background:var(--green);color:#000;font-size:0.6rem;font-weight:900;padding:6px 12px;border-radius:var(--r-sm);line-height:1.4;text-align:center;opacity:0;transform:scale(0.5) rotate(-10deg);animation:sigStamp 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards 2.8s;box-shadow:0 3px 12px rgba(57,255,20,0.3)}
 @keyframes sigStamp{to{opacity:1;transform:scale(1) rotate(-4deg)}}
 .sig-meta{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:0.6rem;color:var(--txt-faint);opacity:0;animation:sigFadeUp 0.6s ease forwards 3.4s}
@@ -202,7 +201,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 .sig-replay{margin-top:16px;padding:10px 28px;background:linear-gradient(135deg,rgba(139,0,0,0.4),rgba(139,0,0,0.2));color:var(--gold);border:1px solid rgba(212,175,55,0.2);border-radius:100px;font-family:var(--font);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s ease;display:block;margin-left:auto;margin-right:auto;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
 .sig-replay:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(212,175,55,0.15);transform:translateY(-2px)}
 
-.footer-bar{margin-top:16px;padding:14px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));border-radius:0 0 var(--r-lg) var(--r-lg);color:var(--txt-faint);font-size:0.65rem;font-weight:600;letter-spacing:0.3px;border-top:1px solid rgba(212,175,55,0.06);transition:background var(--transition)}
+.footer-bar{font-family:var(--font-naskh);margin-top:16px;padding:14px 20px;text-align:center;background:linear-gradient(90deg,rgba(139,0,0,0.3),rgba(10,14,22,0.8),rgba(139,0,0,0.3));border-radius:0 0 var(--r-lg) var(--r-lg);color:var(--txt-faint);font-size:0.65rem;font-weight:600;letter-spacing:0.3px;border-top:1px solid rgba(212,175,55,0.06);transition:background var(--transition)}
 
 .loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;backdrop-filter:blur(6px)}
 .loading-overlay.is-active{display:flex}
@@ -213,7 +212,101 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes shakeX{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
-@media(max-width:520px){.page-wrap{padding:12px}.login-card{padding:22px 18px 20px}.header-title{font-size:1.25rem}.heart-wrap{width:80px;height:80px}.sig-arabic{font-size:22px}.sig-english{font-size:38px}.sig-svg{height:120px}.features-grid{gap:6px}.feature-item{font-size:0.7rem;padding:6px 8px}.security-badge,.version-badge{font-size:10px;padding:5px 12px}.theme-toggle-btn{width:36px;height:36px;font-size:15px}}
+.forgot-password-wrap{text-align:center;margin-top:14px;position:relative;z-index:1}
+.forgot-password-link{background:none;border:none;color:var(--gold);font-family:var(--font-naskh);font-size:0.8rem;font-weight:600;cursor:pointer;transition:color 0.2s;display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r-sm)}
+.forgot-password-link:hover{color:var(--gold-light);text-decoration:underline}
+.forgot-password-link i{font-size:0.75rem}
+
+.modal-overlay{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;animation:modalFadeIn 0.3s ease}
+.modal-overlay.is-active{display:flex}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+.modal-card{background:var(--surface);border:1px solid rgba(212,175,55,0.15);border-radius:var(--r-lg);padding:28px 24px 24px;width:100%;max-width:420px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.05);animation:modalSlideUp 0.4s var(--ease)}
+@keyframes modalSlideUp{from{opacity:0;transform:translateY(30px) scale(0.97)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:12px;left:12px;background:none;border:none;color:var(--txt-muted);font-size:1rem;cursor:pointer;padding:6px;border-radius:50%;transition:all 0.2s;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:var(--gold);background:rgba(212,175,55,0.1)}
+.modal-header{text-align:center;margin-bottom:22px}
+.modal-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(139,0,0,0.3),rgba(139,0,0,0.1));border:1px solid rgba(139,0,0,0.4);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--gold);margin:0 auto 12px;box-shadow:0 0 20px rgba(139,0,0,0.2)}
+.modal-header h3{font-family:var(--font-naskh);font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:4px}
+.modal-header p{font-size:0.72rem;color:var(--txt-muted);line-height:1.4}
+
+.otp-wrap{display:flex;gap:8px;justify-content:center;margin:18px 0;direction:ltr}
+.otp-input{width:44px;height:52px;background:var(--input-bg);border:1.5px solid rgba(212,175,55,0.15);border-radius:var(--r-md);color:var(--txt);font-family:var(--font);font-size:1.4rem;font-weight:700;text-align:center;outline:none;transition:border-color 0.3s,box-shadow 0.3s,background 0.3s}
+.otp-input:focus{border-color:var(--gold);background:rgba(12,16,26,0.9);box-shadow:0 0 0 3px rgba(212,175,55,0.08),0 4px 20px rgba(212,175,55,0.06)}
+.otp-input.is-error{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,7,58,0.08)}
+.otp-input.is-success{border-color:var(--green);box-shadow:0 0 0 3px rgba(57,255,20,0.06)}
+.otp-timer{display:flex;justify-content:center;align-items:center;gap:12px;margin:12px 0 18px;font-size:0.75rem;color:var(--txt-muted)}
+.otp-timer #otpTimer{font-family:monospace;font-weight:700;color:var(--gold);font-size:0.85rem}
+.otp-resend{background:none;border:none;color:var(--txt-muted);font-family:var(--font);font-size:0.72rem;font-weight:600;cursor:pointer;transition:color 0.2s;padding:4px 8px;border-radius:var(--r-sm)}
+.otp-resend:not(:disabled){color:var(--cyan)}
+.otp-resend:not(:disabled):hover{color:var(--gold);text-decoration:underline}
+.otp-resend:disabled{cursor:not-allowed;opacity:0.5}
+
+.pwd-strength{margin-top:8px;padding:0 4px}
+.strength-bar{height:4px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden;margin-bottom:4px}
+.strength-fill{height:100%;width:0%;border-radius:100px;transition:width 0.4s var(--ease),background 0.4s ease}
+.strength-fill.weak{background:var(--red);width:33%}
+.strength-fill.fair{background:var(--orange);width:66%}
+.strength-fill.strong{background:var(--green);width:100%}
+.strength-text{font-size:0.65rem;color:var(--txt-faint);font-weight:600}
+
+.forgot-hint{display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding:10px 12px;background:rgba(0,243,255,0.04);border:1px solid rgba(0,243,255,0.1);border-radius:var(--r-sm);font-size:0.7rem;color:var(--txt-muted);line-height:1.5}
+.forgot-hint i{color:var(--cyan);font-size:0.75rem;margin-top:2px;flex-shrink:0}
+
+.accessibility-btn{position:fixed;bottom:20px;left:68px;z-index:100;background:rgba(10,14,22,0.85);border:1px solid rgba(0,243,255,0.2);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:18px;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s ease}
+.accessibility-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,243,255,0.2);border-color:var(--cyan)}
+.accessibility-btn.is-active{background:rgba(0,243,255,0.15);border-color:var(--cyan)}
+.accessibility-panel{position:fixed;bottom:72px;left:20px;z-index:99;background:var(--surface);border:1px solid rgba(0,243,255,0.15);border-radius:var(--r-lg);padding:18px;width:240px;box-shadow:0 16px 48px rgba(0,0,0,0.6);backdrop-filter:blur(20px);transform:translateY(10px);opacity:0;pointer-events:none;transition:all 0.3s var(--ease)}
+.accessibility-panel.is-active{transform:translateY(0);opacity:1;pointer-events:auto}
+.access-title{font-family:var(--font-naskh);font-size:0.85rem;font-weight:700;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(0,243,255,0.1);padding-bottom:10px}
+.access-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.access-row:last-child{border-bottom:none}
+.access-label{font-size:0.75rem;color:var(--txt-muted);font-weight:600}
+.access-toggle{background:none;border:none;cursor:pointer;padding:0}
+.toggle-track{width:40px;height:22px;background:rgba(255,255,255,0.1);border-radius:100px;position:relative;transition:background 0.3s ease;display:block}
+.toggle-track::after{content:'';position:absolute;top:2px;right:2px;width:18px;height:18px;background:var(--txt-muted);border-radius:50%;transition:all 0.3s var(--ease)}
+.access-toggle[aria-pressed="true"] .toggle-track{background:rgba(57,255,20,0.25)}
+.access-toggle[aria-pressed="true"] .toggle-track::after{background:var(--green);transform:translateX(-18px)}
+.font-size-controls{display:flex;align-items:center;gap:8px}
+.font-size-controls button{width:28px;height:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.15);border-radius:var(--r-sm);color:var(--gold);font-size:0.7rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.font-size-controls button:hover{background:rgba(212,175,55,0.1);border-color:var(--gold)}
+.font-size-controls span{font-size:0.72rem;color:var(--txt-muted);font-weight:700;min-width:36px;text-align:center;font-family:monospace}
+
+body.high-contrast{--gold:#FFD700;--gold-light:#FFF8DC;--gold-dim:rgba(255,215,0,0.3);--gold-glow:rgba(255,215,0,0.6);--crimson:#FF0000;--crimson-mid:#FF3333;--crimson-glow:rgba(255,0,0,0.7);--cyan:#00FFFF;--green:#00FF00;--red:#FF0000;--orange:#FFAA00;--bg:#000000;--surface:rgba(20,20,20,0.98);--txt:#FFFFFF;--txt-muted:#CCCCCC;--txt-faint:#AAAAAA}
+body.high-contrast .login-card,body.high-contrast .signature-section{border-width:2px;border-color:var(--gold)}
+body.high-contrast .field-input{border-width:2px}
+body.high-contrast .field-input:focus{box-shadow:0 0 0 4px rgba(255,215,0,0.2)}
+body.high-contrast .btn-login{border-width:2px}
+body.high-contrast .otp-input{border-width:2px}
+body.high-contrast .modal-card{border-width:2px}
+body.high-contrast .accessibility-panel{border-width:2px}
+body.high-contrast .theme-toggle-btn,body.high-contrast .accessibility-btn{border-width:2px}
+
+body.reduced-motion *,body.reduced-motion *::before,body.reduced-motion *::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+body.reduced-motion .scanlines{display:none}
+body.reduced-motion .emblem-ring svg.ring-svg{animation:none}
+body.reduced-motion .heart-wrap img{animation:none}
+
+body.dyslexic-font{--font:'Comic Neue','Comic Sans MS',sans-serif;--font-naskh:'Comic Neue','Comic Sans MS',sans-serif}
+body.dyslexic-font .field-input,body.dyslexic-font .btn-login,body.dyslexic-font .otp-input{font-family:var(--font)}
+
+body.font-size-90 .page-wrap{transform:scale(0.95);transform-origin:top center}
+body.font-size-110 .page-wrap{transform:scale(1.05);transform-origin:top center}
+body.font-size-120 .page-wrap{transform:scale(1.1);transform-origin:top center}
+body.font-size-130 .page-wrap{transform:scale(1.15);transform-origin:top center}
+
+body.light-theme .modal-overlay{background:rgba(0,0,0,0.6)}
+body.light-theme .modal-card{background:var(--surface);border-color:rgba(0,0,0,0.1)}
+body.light-theme .otp-input{background:var(--input-bg)}
+body.light-theme .otp-input:focus{background:rgba(255,255,255,0.9)}
+body.light-theme .strength-bar{background:rgba(0,0,0,0.08)}
+body.light-theme .forgot-hint{background:rgba(0,243,255,0.03);border-color:rgba(0,243,255,0.15)}
+body.light-theme .accessibility-btn{background:rgba(255,255,255,0.85);color:var(--txt);border-color:rgba(0,0,0,0.1)}
+body.light-theme .accessibility-panel{background:rgba(255,255,255,0.95);border-color:rgba(0,0,0,0.1)}
+body.light-theme .access-row{border-color:rgba(0,0,0,0.06)}
+body.light-theme .toggle-track{background:rgba(0,0,0,0.1)}
+body.light-theme .font-size-controls button{background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.1);color:var(--txt)}
+
+@media(max-width:520px){.page-wrap{padding:12px}.login-card{padding:22px 18px 20px}.modal-card{padding:22px 18px 18px}.otp-input{width:38px;height:46px;font-size:1.2rem}.header-title{font-size:1.25rem}.heart-wrap{width:80px;height:80px}.sig-arabic{font-size:22px}.sig-english{font-size:38px}.sig-svg{height:120px}.features-grid{gap:6px}.feature-item{font-size:0.7rem;padding:6px 8px}.security-badge,.version-badge{font-size:10px;padding:5px 12px}.theme-toggle-btn{width:36px;height:36px;font-size:15px}}
 @media(max-width:360px){.features-grid{grid-template-columns:1fr}.sig-arabic{font-size:18px}.sig-english{font-size:32px}.sig-svg{height:100px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
 </style>
@@ -225,10 +318,42 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 <div class="scanlines" aria-hidden="true"></div>
 
 <div class="security-badge" role="status" aria-label="اتصال آمن"><i class="fas fa-shield-alt" aria-hidden="true"></i>اتصال آمن · TLS 1.3</div>
-<div class="version-badge" aria-hidden="true">نظام الشكاوى · v2.1 · 2026</div>
+<div class="version-badge" aria-hidden="true">نظام الشكاوى · v2.2 · 2026</div>
 <button class="theme-toggle-btn" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري" aria-label="تبديل السمة">
   <i class="fas fa-moon" id="themeIcon"></i>
 </button>
+<button class="accessibility-btn" id="accessBtn" onclick="toggleAccessibilityPanel()" title="إعدادات إمكانية الوصول" aria-label="إعدادات إمكانية الوصول" aria-expanded="false" aria-controls="accessPanel">
+  <i class="fas fa-universal-access"></i>
+</button>
+<div class="accessibility-panel" id="accessPanel" role="region" aria-label="إعدادات إمكانية الوصول">
+  <div class="access-title"><i class="fas fa-universal-access"></i> إمكانية الوصول</div>
+  <div class="access-row">
+    <span class="access-label">تباين عالٍ</span>
+    <button class="access-toggle" id="highContrastToggle" onclick="toggleHighContrast()" aria-pressed="false" aria-label="تبديل التباين العالي">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    </button>
+  </div>
+  <div class="access-row">
+    <span class="access-label">حجم الخط</span>
+    <div class="font-size-controls">
+      <button onclick="changeFontSize(-1)" aria-label="تصغير الخط"><i class="fas fa-minus"></i></button>
+      <span id="fontSizeLabel">100%</span>
+      <button onclick="changeFontSize(1)" aria-label="تكبير الخط"><i class="fas fa-plus"></i></button>
+    </div>
+  </div>
+  <div class="access-row">
+    <span class="access-label">حركة مخففة</span>
+    <button class="access-toggle" id="reducedMotionToggle" onclick="toggleReducedMotion()" aria-pressed="false" aria-label="تبديل الحركة المخففة">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    </button>
+  </div>
+  <div class="access-row">
+    <span class="access-label">خط عريض</span>
+    <button class="access-toggle" id="dyslexicToggle" onclick="toggleDyslexicFont()" aria-pressed="false" aria-label="تبديل الخط العريض">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+    </button>
+  </div>
+</div>
 <div class="toast-region" id="toastRegion" role="log" aria-live="polite" aria-atomic="false"></div>
 
 <main class="page-wrap">
@@ -274,6 +399,11 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 <p class="caps-warn" id="capsWarn" role="status" aria-live="polite"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i>Caps Lock مفعّل</p>
 </div>
 <button type="submit" class="btn-login" id="loginBtn" aria-label="تسجيل الدخول"><i class="fas fa-sign-in-alt" aria-hidden="true"></i><span class="btn-text">تسجيل الدخول</span><i class="fas fa-circle-notch fa-spin spinner" aria-hidden="true"></i></button>
+<div class="forgot-password-wrap">
+  <button type="button" class="forgot-password-link" onclick="showForgotModal()" aria-label="نسيت كلمة المرور">
+    <i class="fas fa-key" aria-hidden="true"></i> نسيت كلمة المرور؟
+  </button>
+</div>
 </form>
 
 <div class="features-grid">
@@ -285,10 +415,10 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 
 <div class="demo-accounts">
 <div class="demo-title">حسابات تجريبية — اضغط للتعبئة</div>
-<div class="demo-row" onclick="fillDemo('admin@heartcenter.sa','admin123')"><span class="demo-email">admin@heartcenter.sa</span><span class="demo-role admin">مدير</span></div>
-<div class="demo-row" onclick="fillDemo('doctor@heartcenter.sa','doctor123')"><span class="demo-email">doctor@heartcenter.sa</span><span class="demo-role doctor">طبيب</span></div>
-<div class="demo-row" onclick="fillDemo('nurse@heartcenter.sa','nurse123')"><span class="demo-email">nurse@heartcenter.sa</span><span class="demo-role nurse">ممرض</span></div>
-<div class="demo-row" onclick="fillDemo('patient@heartcenter.sa','patient123')"><span class="demo-email">patient@heartcenter.sa</span><span class="demo-role patient">مريض</span></div>
+<div class="demo-row" onclick="fillDemo('admin@heartcenter.ye','admin123')"><span class="demo-email">admin@heartcenter.ye</span><span class="demo-role admin">مدير</span></div>
+<div class="demo-row" onclick="fillDemo('doctor@heartcenter.ye','doctor123')"><span class="demo-email">doctor@heartcenter.ye</span><span class="demo-role doctor">طبيب</span></div>
+<div class="demo-row" onclick="fillDemo('nurse@heartcenter.ye','nurse123')"><span class="demo-email">nurse@heartcenter.ye</span><span class="demo-role nurse">ممرض</span></div>
+<div class="demo-row" onclick="fillDemo('patient@heartcenter.ye','patient123')"><span class="demo-email">patient@heartcenter.ye</span><span class="demo-role patient">مريض</span></div>
 </div>
 
 <div class="security-row" aria-label="معلومات الأمان">
@@ -323,30 +453,110 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 <div class="footer-bar">© 2026 وزارة الصحة والبيئة — هيئة مستشفى الثورة العام | جميع الحقوق محفوظة</div>
 </main>
 
+<!-- نماذج استعادة كلمة المرور -->
+<div class="modal-overlay" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hideForgotModal()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+    <div class="modal-header">
+      <div class="modal-icon"><i class="fas fa-unlock-alt"></i></div>
+      <h3 id="forgotTitle">استعادة كلمة المرور</h3>
+      <p>أدخل بريدك الإلكتروني لإرسال رمز التحقق</p>
+    </div>
+    <form id="forgotForm" novalidate>
+      <div class="field-wrap">
+        <input type="email" class="field-input" id="forgotEmail" required placeholder="email" autocomplete="email" aria-required="true" aria-describedby="forgotEmailErr">
+        <label class="field-label" for="forgotEmail"><i class="fas fa-envelope"></i>البريد الإلكتروني</label>
+        <div class="field-line"></div>
+        <p class="field-error" id="forgotEmailErr" role="alert"></p>
+      </div>
+      <button type="submit" class="btn-login" id="forgotBtn" aria-label="إرسال رمز التحقق">
+        <i class="fas fa-paper-plane"></i><span class="btn-text">إرسال رمز التحقق</span>
+        <i class="fas fa-circle-notch fa-spin spinner" aria-hidden="true"></i>
+      </button>
+    </form>
+    <div class="forgot-hint">
+      <i class="fas fa-info-circle"></i>
+      <span>سيتم إرسال رمز مكون من 6 أرقام إلى بريدك المسجل</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="otpModal" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hideOtpModal()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+    <div class="modal-header">
+      <div class="modal-icon"><i class="fas fa-shield-alt"></i></div>
+      <h3 id="otpTitle">التحقق من الهوية</h3>
+      <p>أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك</p>
+    </div>
+    <form id="otpForm" novalidate>
+      <div class="otp-wrap">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 1">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 2">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 3">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 4">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 5">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="رقم 6">
+      </div>
+      <p class="field-error" id="otpErr" role="alert"></p>
+      <div class="otp-timer">
+        <span id="otpTimer">05:00</span>
+        <button type="button" class="otp-resend" id="otpResend" onclick="resendOtp()" disabled>إعادة الإرسال</button>
+      </div>
+      <button type="submit" class="btn-login" id="otpBtn" aria-label="تحقق">
+        <i class="fas fa-check"></i><span class="btn-text">تحقق</span>
+        <i class="fas fa-circle-notch fa-spin spinner" aria-hidden="true"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+  <div class="modal-card">
+    <button class="modal-close" onclick="hideResetModal()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+    <div class="modal-header">
+      <div class="modal-icon"><i class="fas fa-lock"></i></div>
+      <h3 id="resetTitle">كلمة مرور جديدة</h3>
+      <p>أدخل كلمة المرور الجديدة وتأكيدها</p>
+    </div>
+    <form id="resetForm" novalidate>
+      <div class="field-wrap">
+        <input type="password" class="field-input password-field" id="newPassword" required placeholder="password" minlength="8" aria-required="true" aria-describedby="newPwdErr pwdStrength">
+        <label class="field-label" for="newPassword"><i class="fas fa-lock"></i>كلمة المرور الجديدة</label>
+        <div class="field-line"></div>
+        <button type="button" class="field-action" id="toggleNewPwd" aria-label="إظهار كلمة المرور"><i class="fas fa-eye" id="newEyeIcon"></i></button>
+        <div class="pwd-strength" id="pwdStrength">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <span class="strength-text" id="strengthText">أدخل كلمة مرور قوية</span>
+        </div>
+        <p class="field-error" id="newPwdErr" role="alert"></p>
+      </div>
+      <div class="field-wrap">
+        <input type="password" class="field-input password-field" id="confirmPassword" required placeholder="password" aria-required="true" aria-describedby="confirmPwdErr">
+        <label class="field-label" for="confirmPassword"><i class="fas fa-lock"></i>تأكيد كلمة المرور</label>
+        <div class="field-line"></div>
+        <button type="button" class="field-action" id="toggleConfirmPwd" aria-label="إظهار كلمة المرور"><i class="fas fa-eye" id="confirmEyeIcon"></i></button>
+        <p class="field-error" id="confirmPwdErr" role="alert"></p>
+      </div>
+      <button type="submit" class="btn-login" id="resetBtn" aria-label="حفظ كلمة المرور">
+        <i class="fas fa-save"></i><span class="btn-text">حفظ كلمة المرور الجديدة</span>
+        <i class="fas fa-circle-notch fa-spin spinner" aria-hidden="true"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
 <div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite" aria-label="جاري التحميل"><div class="loading-ring" aria-hidden="true"></div><div class="loading-text">جاري التحقق...</div></div>
 
-<!-- مكتبات التصدير (Excel / PDF) -->
+<!-- مكتبات التصدير -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-<!-- ملفات المشروع الخارجية (اختيارية — الكود يعمل بدونها تلقائياً) -->
-<script src="js/db.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/export.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/new-complaint.js"></script>
-<script src="js/complaint-detail.js"></script>
-<script src="js/doctors.js"></script>
-<script src="js/services.js"></script>
-<script src="js/appointments.js"></script>
-<script src="js/consultations.js"></script>
-<script src="js/schedule.js"></script>
-
 <script>
 // ═══════════════════════════════════════════════════════
-// نظام تسجيل الدخول — مُتوافق مع DB Module (users.html)
+// نظام تسجيل الدخول — مع تشفير SHA-256
+// الإصدار: v2.2 (مصحح)
 // ═══════════════════════════════════════════════════════
 (function() {
     'use strict';
@@ -359,91 +569,36 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         KEY_SESSION: 'hc_session',
         KEY_ATTEMPTS: 'hc_attempts',
         KEY_LOCKOUT: 'hc_lockout',
-        KEY_USERS: 'hc_users_v2',        // ← موحد مع users.html
+        KEY_USERS: 'hc_users_v2',
         KEY_CURRENT_USER: 'hc_currentUser',
         KEY_THEME: 'hc_theme'
     });
 
-    // ── 2. PASSWORD UTILITIES (مشتركة مع users.html) ──
-    const PasswordUtils = {
-        async hash(password) {
-            if (!password) return '';
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password.trim());
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // ── 2. TOAST NOTIFICATIONS ──
+    const Toast = {
+        ICONS: { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' },
+        region: null,
+        init() {
+            this.region = document.getElementById('toastRegion');
         },
-        async verify(plainPassword, storedPassword) {
-            if (!plainPassword || !storedPassword) return false;
-            const trimmedPlain = plainPassword.trim();
-            if (storedPassword.length === 64 && /^[a-f0-9]{64}$/i.test(storedPassword)) {
-                const hashedPlain = await this.hash(trimmedPlain);
-                return hashedPlain === storedPassword.toLowerCase();
-            }
-            return trimmedPlain === storedPassword;
+        show(msg, type, ms) {
+            type = type || 'info';
+            ms = ms || 4000;
+            if (!this.region) this.init();
+            if (!this.region) return;
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.setAttribute('role', 'status');
+            t.innerHTML = '<i class="fas ' + (this.ICONS[type] || this.ICONS.info) + '" aria-hidden="true"></i><span>' + msg + '</span>';
+            this.region.appendChild(t);
+            setTimeout(() => {
+                t.classList.add('is-out');
+                t.addEventListener('animationend', () => t.remove(), { once: true });
+            }, ms);
         }
     };
 
-    // ── 3. DB MODULE (مشترك مع users.html) ──
-    const DB = (function() {
-        const STORAGE_KEY = CFG.KEY_USERS;
-        const LOG_KEY = 'hc_logs';
-
-        function getUsers() {
-            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-            catch(e) { return []; }
-        }
-        function saveUsers(users) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-        }
-        function addLog(action, details) {
-            const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
-            logs.unshift({ id: Date.now() + Math.random(), action, details, timestamp: Date.now(), user: 'system' });
-            if (logs.length > 500) logs.length = 500;
-            localStorage.setItem(LOG_KEY, JSON.stringify(logs));
-        }
-        function normalizeEmail(email) {
-            return (email || '').trim().toLowerCase();
-        }
-
-        // بيانات تجريبية موحدة
-        async function seedData() {
-            const users = getUsers();
-            if (users.length === 0) {
-                const demoUsers = [
-                    { name: 'د. صلاح الأحمدي', email: 'admin@heartcenter.ye', password: 'admin123', role: 'admin', department: 'إدارة المركز', phone: '777000000', status: 'active', createdAt: Date.now() },
-                    { name: 'د. أحمد القاضي', email: 'dr.ahmed@heartcenter.ye', password: 'doctor123', role: 'doctor', department: 'جراحة القلب', phone: '777111111', status: 'active', createdAt: Date.now() - 86400000 },
-                    { name: 'ممرضة فاطمة', email: 'nurse.fatima@heartcenter.ye', password: 'nurse123', role: 'nurse', department: 'العناية المركزة', phone: '777222222', status: 'active', createdAt: Date.now() - 172800000 },
-                    { name: 'مريض علي', email: 'patient.ali@heartcenter.ye', password: 'patient123', role: 'patient', department: '—', phone: '777333333', status: 'active', createdAt: Date.now() - 259200000 }
-                ];
-                for (const user of demoUsers) {
-                    user.password = await PasswordUtils.hash(user.password);
-                }
-                saveUsers(demoUsers);
-                addLog('SEED_DATA', 'تم إنشاء البيانات التجريبية');
-            }
-        }
-
-        return {
-            init: async function() { await seedData(); return true; },
-            getAllUsers: async function() { return getUsers(); },
-            getUserByEmail: async function(email) {
-                const normalized = normalizeEmail(email);
-                return getUsers().find(u => normalizeEmail(u.email) === normalized) || null;
-            },
-            verifyCredentials: async function(email, password) {
-                const user = await this.getUserByEmail(email);
-                if (!user) return null;
-                if (user.status === 'inactive') return null;
-                const isValid = await PasswordUtils.verify(password, user.password);
-                if (!isValid) return null;
-                return user;
-            }
-        };
-    })();
-
-    // ── 4. LOCAL AUTH (للقفل والمحاولات) ──
+    // ── 3. LOCAL AUTH ──
     const LocalAuth = {
         MAX_ATTEMPTS: CFG.MAX_ATTEMPTS,
         _getAttempts() {
@@ -492,31 +647,108 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         }
     };
 
-    // ── 5. TOAST NOTIFICATIONS ──
-    const Toast = {
-        ICONS: { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' },
-        region: null,
-        init() {
-            this.region = document.getElementById('toastRegion');
+    // ── PASSWORD UTILITIES (SHA-256) ──
+    const PasswordUtils = {
+        async hash(password) {
+            if (!password) return '';
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password.trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         },
-        show(msg, type, ms) {
-            type = type || 'info';
-            ms = ms || 4000;
-            if (!this.region) this.init();
-            if (!this.region) return;
-            const t = document.createElement('div');
-            t.className = 'toast ' + type;
-            t.setAttribute('role', 'status');
-            t.innerHTML = '<i class="fas ' + (this.ICONS[type] || this.ICONS.info) + '" aria-hidden="true"></i><span>' + msg + '</span>';
-            this.region.appendChild(t);
-            setTimeout(() => {
-                t.classList.add('is-out');
-                t.addEventListener('animationend', () => t.remove(), { once: true });
-            }, ms);
+        async verify(plainPassword, storedPassword) {
+            if (!plainPassword || !storedPassword) return false;
+            const trimmedPlain = plainPassword.trim();
+            if (storedPassword.length === 64 && /^[a-f0-9]{64}$/i.test(storedPassword)) {
+                const hashedPlain = await this.hash(trimmedPlain);
+                return hashedPlain === storedPassword.toLowerCase();
+            }
+            return trimmedPlain === storedPassword;
         }
     };
 
-    // ── 6. DOM SHORTCUTS ──
+    // ── HTML ESCAPE ──
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ── 4. DB MODULE ──
+    const DB = (function() {
+        const STORAGE_KEY = CFG.KEY_USERS;
+        const LOG_KEY = 'hc_logs';
+
+        function getUsers() {
+            try { 
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return [];
+                return JSON.parse(raw);
+            }
+            catch(e) { 
+                console.error('❌ Failed to parse users data:', e);
+                localStorage.removeItem(STORAGE_KEY);
+                return []; 
+            }
+        }
+        function saveUsers(users) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+            } catch (e) {
+                console.error('localStorage error:', e);
+                Toast.show('خطأ في حفظ البيانات', 'error');
+                throw e;
+            }
+        }
+        function addLog(action, details) {
+            const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+            logs.unshift({ id: Date.now() + Math.random(), action, details, timestamp: Date.now(), user: 'system' });
+            if (logs.length > 500) logs.length = 500;
+            localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+        }
+        function normalizeEmail(email) {
+            return (email || '').trim().toLowerCase();
+        }
+
+        async function seedData() {
+            const users = getUsers();
+            if (users.length === 0) {
+                const demoUsers = [
+                    { name: 'د. صلاح الأحمدي', email: 'admin@heartcenter.ye', password: 'admin123', role: 'admin', department: 'إدارة المركز', phone: '777000000', status: 'active', createdAt: Date.now() },
+                    { name: 'د. أحمد القاضي', email: 'doctor@heartcenter.ye', password: 'doctor123', role: 'doctor', department: 'جراحة القلب', phone: '777111111', status: 'active', createdAt: Date.now() - 86400000 },
+                    { name: 'ممرضة فاطمة', email: 'nurse@heartcenter.ye', password: 'nurse123', role: 'nurse', department: 'العناية المركزة', phone: '777222222', status: 'active', createdAt: Date.now() - 172800000 },
+                    { name: 'مريض علي', email: 'patient@heartcenter.ye', password: 'patient123', role: 'patient', department: '—', phone: '777333333', status: 'active', createdAt: Date.now() - 259200000 }
+                ];
+                for (const user of demoUsers) {
+                    user.password = await PasswordUtils.hash(user.password);
+                }
+                saveUsers(demoUsers);
+                addLog('SEED_DATA', 'تم إنشاء البيانات التجريبية');
+            }
+        }
+
+        return {
+            init: async function() { await seedData(); return true; },
+            getAllUsers: function() { return getUsers(); },
+            getUserByEmail: function(email) {
+                const normalized = normalizeEmail(email);
+                return getUsers().find(u => normalizeEmail(u.email) === normalized) || null;
+            },
+            verifyCredentials: async function(email, password) {
+                const user = this.getUserByEmail(email);
+                if (!user) return null;
+                if (user.status === 'inactive') return null;
+                const isValid = await PasswordUtils.verify(password, user.password);
+                if (!isValid) return null;
+                return user;
+            },
+            saveUsers: saveUsers
+        };
+    })();
+
+    // ── 5. DOM SHORTCUTS ──
     const $ = (id) => document.getElementById(id);
     const D = {
         form: $('loginForm'),
@@ -532,7 +764,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         loading: $('loadingOverlay')
     };
 
-    // ── 7. CANVAS BACKGROUND ──
+    // ── 6. CANVAS BACKGROUND ──
     (function initCanvas() {
         const canvas = document.getElementById('bgCanvas');
         if (!canvas) return;
@@ -540,12 +772,9 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         let W, H, nodes = [];
         const GOLD = 'rgba(212,175,55,';
         const CYAN = 'rgba(0,243,255,';
-        const RED  = 'rgba(139,0,0,';
+        const RED = 'rgba(139,0,0,';
 
-        function resize() {
-            W = canvas.width = window.innerWidth;
-            H = canvas.height = window.innerHeight;
-        }
+        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
         function buildNodes(n) {
             nodes = Array.from({ length: n }, () => ({
                 x: Math.random() * W, y: Math.random() * H,
@@ -588,7 +817,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         resize(); buildNodes(70); draw();
     })();
 
-    // ── 8. THEME TOGGLE ──
+    // ── 7. THEME TOGGLE ──
     window.toggleTheme = function() {
         document.body.classList.toggle('light-theme');
         const isLight = document.body.classList.contains('light-theme');
@@ -605,7 +834,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         }
     } catch(e) {}
 
-    // ── 9. PROGRESS & VALIDATION ──
+    // ── 8. PROGRESS & VALIDATION ──
     function setProgress(pct) {
         if (D.progress) {
             D.progress.style.width = pct + '%';
@@ -649,7 +878,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         D.loginBtn.setAttribute('aria-busy', on?'true':'false');
     }
 
-    // ── 10. LOGIN HANDLER (مُصلح — يستخدم DB.verifyCredentials) ──
+    // ── 9. LOGIN HANDLER (FIXED) ──
     async function handleSubmit(e) {
         e.preventDefault();
         console.log('📝 محاولة تسجيل الدخول...');
@@ -670,7 +899,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         setProgress(40);
 
         try {
-            // ← استخدام DB.verifyCredentials الموحدة
+            // ✅ الإصلاح: إضافة await
             const user = await DB.verifyCredentials(email, pass);
             setProgress(80);
 
@@ -682,7 +911,6 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
                 fieldOk(D.password);
                 setProgress(100);
 
-                // حفظ الجلسة
                 const safeUser = {
                     email: user.email,
                     name: user.name,
@@ -726,10 +954,6 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
                     LocalAuth.lockAccount();
                     showErr(D.pErr, 'تم قفل الحساب مؤقتاً لمدة 5 دقائق');
                     Toast.show('تم قفل الحساب. يرجى الانتظار 5 دقائق', 'error', 6000);
-
-                    setTimeout(() => {
-                        Toast.show('✅ انتهى وقت القفل. يمكنك المحاولة الآن.', 'info', 4000);
-                    }, LocalAuth.getLockoutRemaining());
                 } else {
                     showErr(D.pErr, 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
                     Toast.show('بيانات غير صحيحة · محاولات متبقية: ' + remaining, 'warning', 4000);
@@ -743,8 +967,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
             setLoading(false);
         }
     }
-
-    // ── 11. DEMO FILL (مُحدّث — يستخدم نفس البيانات التجريبية) ──
+    // ── 10. DEMO FILL ──
     window.fillDemo = function(email, pass) {
         if(D.email) D.email.value = email;
         if(D.password) D.password.value = pass;
@@ -754,7 +977,7 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         console.log('📋 تعبئة:', email);
     };
 
-    // ── 12. REPLAY SIGNATURE ──
+    // ── 11. REPLAY SIGNATURE ──
     window.replaySignature = function() {
         const sec = document.getElementById('signatureSection');
         if(!sec) return;
@@ -765,7 +988,380 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         parent.insertAdjacentHTML('beforeend', html);
     };
 
-    // ── 13. EVENTS ──
+    // ── 12. FORGOT PASSWORD ──
+    let _forgotTargetEmail = '';
+    let _otpCode = '';
+    let _otpTimerInterval = null;
+
+    window.showForgotModal = function() {
+        const m = document.getElementById('forgotModal');
+        if(m) { m.classList.add('is-active'); document.getElementById('forgotEmail').focus(); }
+    };
+    window.hideForgotModal = function() {
+        const m = document.getElementById('forgotModal');
+        if(m) m.classList.remove('is-active');
+    };
+    window.hideOtpModal = function() {
+        const m = document.getElementById('otpModal');
+        if(m) m.classList.remove('is-active');
+        clearOtpTimer();
+    };
+    window.hideResetModal = function() {
+        const m = document.getElementById('resetModal');
+        if(m) m.classList.remove('is-active');
+    };
+
+    function clearOtpTimer() {
+        if(_otpTimerInterval) { clearInterval(_otpTimerInterval); _otpTimerInterval = null; }
+    }
+
+    function startOtpTimer(seconds) {
+        clearOtpTimer();
+        const el = document.getElementById('otpTimer');
+        const resend = document.getElementById('otpResend');
+        if(resend) { resend.disabled = true; resend.textContent = 'إعادة الإرسال'; }
+        let remaining = seconds;
+        function tick() {
+            const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+            const s = (remaining % 60).toString().padStart(2, '0');
+            if(el) el.textContent = m + ':' + s;
+            if(remaining <= 0) {
+                clearOtpTimer();
+                if(resend) { resend.disabled = false; resend.textContent = 'إعادة الإرسال'; }
+                if(el) el.textContent = '00:00';
+            }
+            remaining--;
+        }
+        tick();
+        _otpTimerInterval = setInterval(tick, 1000);
+    }
+
+    window.resendOtp = function() {
+        sendOtp(_forgotTargetEmail);
+        startOtpTimer(300);
+        Toast.show('تم إعادة إرسال الرمز', 'info', 3000);
+    };
+
+    function sendOtp(email) {
+        _otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log('📧 OTP sent to', email, ':', _otpCode);
+        try { sessionStorage.setItem('hc_otp_' + email, _otpCode); } catch(e) {}
+        return true;
+    }
+
+    function handleForgotSubmit(e) {
+        e.preventDefault();
+        const emailInp = document.getElementById('forgotEmail');
+        const errEl = document.getElementById('forgotEmailErr');
+        const btn = document.getElementById('forgotBtn');
+        const email = emailInp.value.trim();
+
+        if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showErr(errEl, 'بريد إلكتروني غير صالح');
+            fieldErr(emailInp); return;
+        }
+
+        const user = DB.getUserByEmail(email);
+        if(!user) {
+            showErr(errEl, 'لا يوجد حساب مرتبط بهذا البريد');
+            fieldErr(emailInp); return;
+        }
+
+        btn.disabled = true; btn.classList.add('is-loading');
+        sendOtp(email);
+        _forgotTargetEmail = email;
+
+        hideForgotModal();
+        const otpModal = document.getElementById('otpModal');
+        if(otpModal) {
+            otpModal.classList.add('is-active');
+            setTimeout(() => {
+                const firstOtp = document.querySelector('.otp-input');
+                if(firstOtp) firstOtp.focus();
+            }, 300);
+        }
+        startOtpTimer(300);
+        Toast.show('تم إرسال رمز التحقق إلى بريدك', 'success', 4000);
+        btn.disabled = false; btn.classList.remove('is-loading');
+    }
+
+    function handleOtpSubmit(e) {
+        e.preventDefault();
+        const inputs = document.querySelectorAll('.otp-input');
+        const code = Array.from(inputs).map(i => i.value).join('');
+        const errEl = document.getElementById('otpErr');
+        const btn = document.getElementById('otpBtn');
+
+        if(code.length !== 6) {
+            showErr(errEl, 'يرجى إدخال الرمز كاملاً');
+            inputs.forEach(i => fieldErr(i)); return;
+        }
+
+        btn.disabled = true; btn.classList.add('is-loading');
+
+        const storedOtp = (function(){ try{return sessionStorage.getItem('hc_otp_' + _forgotTargetEmail);}catch(e){return null;} })();
+        if(code === _otpCode || code === storedOtp) {
+            hideOtpModal();
+            clearOtpTimer();
+            const resetModal = document.getElementById('resetModal');
+            if(resetModal) {
+                resetModal.classList.add('is-active');
+                setTimeout(() => document.getElementById('newPassword').focus(), 300);
+            }
+            inputs.forEach(i => { i.value = ''; fieldReset(i); });
+            Toast.show('تم التحقق بنجاح. أدخل كلمة المرور الجديدة', 'success', 4000);
+        } else {
+            showErr(errEl, 'رمز التحقق غير صحيح');
+            inputs.forEach(i => fieldErr(i));
+            Toast.show('رمز التحقق غير صحيح', 'error', 3000);
+        }
+        btn.disabled = false; btn.classList.remove('is-loading');
+    }
+
+    function checkPasswordStrength(pwd) {
+        let score = 0;
+        if(pwd.length >= 8) score++;
+        if(pwd.length >= 12) score++;
+        if(/[A-Z]/.test(pwd)) score++;
+        if(/[a-z]/.test(pwd)) score++;
+        if(/[0-9]/.test(pwd)) score++;
+        if(/[^A-Za-z0-9]/.test(pwd)) score++;
+        if(score <= 2) return 'weak';
+        if(score <= 4) return 'fair';
+        return 'strong';
+    }
+
+    function updateStrengthUI(pwd) {
+        const fill = document.getElementById('strengthFill');
+        const text = document.getElementById('strengthText');
+        if(!fill || !text) return;
+        const strength = checkPasswordStrength(pwd);
+        fill.className = 'strength-fill ' + strength;
+        const labels = { weak: 'ضعيفة', fair: 'متوسطة', strong: 'قوية' };
+        const colors = { weak: 'var(--red)', fair: 'var(--orange)', strong: 'var(--green)' };
+        text.textContent = 'قوة كلمة المرور: ' + labels[strength];
+        text.style.color = colors[strength];
+    }
+
+    async function handleResetSubmit(e) {
+        e.preventDefault();
+        const newPwd = document.getElementById('newPassword').value;
+        const confirmPwd = document.getElementById('confirmPassword').value;
+        const newErr = document.getElementById('newPwdErr');
+        const confirmErr = document.getElementById('confirmPwdErr');
+        const btn = document.getElementById('resetBtn');
+
+        clearErr(newErr, document.getElementById('newPassword'));
+        clearErr(confirmErr, document.getElementById('confirmPassword'));
+
+        let ok = true;
+        if(!newPwd || newPwd.length < 8) {
+            showErr(newErr, 'الحد الأدنى 8 أحرف');
+            fieldErr(document.getElementById('newPassword')); ok = false;
+        } else if(checkPasswordStrength(newPwd) === 'weak') {
+            showErr(newErr, 'كلمة المرور ضعيفة جداً');
+            fieldErr(document.getElementById('newPassword')); ok = false;
+        }
+        if(newPwd !== confirmPwd) {
+            showErr(confirmErr, 'كلمتا المرور غير متطابقتين');
+            fieldErr(document.getElementById('confirmPassword')); ok = false;
+        }
+        if(!ok) return;
+
+        btn.disabled = true; btn.classList.add('is-loading');
+
+        const users = DB.getAllUsers();
+        const idx = users.findIndex(u => u.email.toLowerCase() === _forgotTargetEmail.toLowerCase());
+        if(idx !== -1) {
+            users[idx].password = await PasswordUtils.hash(newPwd);
+            users[idx].updatedAt = Date.now();
+            DB.saveUsers(users);
+            hideResetModal();
+            Toast.show('تم تغيير كلمة المرور بنجاح! سجل دخولك الآن', 'success', 5000);
+            if(D.email) D.email.value = _forgotTargetEmail;
+            if(D.password) { D.password.value = ''; D.password.focus(); }
+        } else {
+            Toast.show('حدث خطأ. يرجى المحاولة لاحقاً', 'error', 4000);
+        }
+        btn.disabled = false; btn.classList.remove('is-loading');
+    }
+
+    function initOtpInputs() {
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((inp, idx) => {
+            inp.addEventListener('keydown', (e) => {
+                if(e.key >= '0' && e.key <= '9') {
+                    inp.value = '';
+                    setTimeout(() => {
+                        if(idx < inputs.length - 1) inputs[idx + 1].focus();
+                    }, 10);
+                } else if(e.key === 'Backspace') {
+                    if(!inp.value && idx > 0) {
+                        setTimeout(() => inputs[idx - 1].focus(), 10);
+                    }
+                } else if(e.key === 'ArrowLeft' && idx > 0) {
+                    inputs[idx - 1].focus();
+                } else if(e.key === 'ArrowRight' && idx < inputs.length - 1) {
+                    inputs[idx + 1].focus();
+                }
+            });
+            inp.addEventListener('input', (e) => {
+                const v = e.target.value;
+                if(!/^[0-9]$/.test(v)) { e.target.value = ''; return; }
+                fieldReset(inp);
+                if(idx < inputs.length - 1) inputs[idx + 1].focus();
+            });
+            inp.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = paste.replace(/\D/g, '').split('');
+                digits.forEach((d, i) => { if(inputs[i]) inputs[i].value = d; });
+                const nextIdx = Math.min(digits.length, inputs.length - 1);
+                if(inputs[nextIdx]) inputs[nextIdx].focus();
+            });
+        });
+    }
+
+    function initForgotEvents() {
+        const forgotForm = document.getElementById('forgotForm');
+        const otpForm = document.getElementById('otpForm');
+        const resetForm = document.getElementById('resetForm');
+        if(forgotForm) forgotForm.addEventListener('submit', handleForgotSubmit);
+        if(otpForm) otpForm.addEventListener('submit', handleOtpSubmit);
+        if(resetForm) resetForm.addEventListener('submit', handleResetSubmit);
+
+        const toggleNew = document.getElementById('toggleNewPwd');
+        const newPwd = document.getElementById('newPassword');
+        const newEye = document.getElementById('newEyeIcon');
+        if(toggleNew && newPwd) {
+            toggleNew.addEventListener('click', () => {
+                const hidden = newPwd.type === 'password';
+                newPwd.type = hidden ? 'text' : 'password';
+                if(newEye) newEye.className = hidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+        }
+
+        const toggleConfirm = document.getElementById('toggleConfirmPwd');
+        const confirmPwd = document.getElementById('confirmPassword');
+        const confirmEye = document.getElementById('confirmEyeIcon');
+        if(toggleConfirm && confirmPwd) {
+            toggleConfirm.addEventListener('click', () => {
+                const hidden = confirmPwd.type === 'password';
+                confirmPwd.type = hidden ? 'text' : 'password';
+                if(confirmEye) confirmEye.className = hidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+        }
+
+        if(newPwd) {
+            newPwd.addEventListener('input', () => updateStrengthUI(newPwd.value));
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') {
+                hideForgotModal(); hideOtpModal(); hideResetModal();
+            }
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', (e) => { if(e.target === m) m.classList.remove('is-active'); });
+        });
+
+        initOtpInputs();
+    }
+
+    // ── 13. ACCESSIBILITY ──
+    const Access = {
+        KEY_CONTRAST: 'hc_highContrast',
+        KEY_FONT_SIZE: 'hc_fontSize',
+        KEY_REDUCED: 'hc_reducedMotion',
+        KEY_DYSLEXIC: 'hc_dyslexic',
+        fontSizes: [90, 100, 110, 120, 130],
+        currentFontIdx: 1,
+
+        init() {
+            try {
+                if(localStorage.getItem(this.KEY_CONTRAST) === 'true') this.applyHighContrast(true);
+                const savedSize = parseInt(localStorage.getItem(this.KEY_FONT_SIZE) || '100');
+                this.currentFontIdx = this.fontSizes.indexOf(savedSize);
+                if(this.currentFontIdx === -1) this.currentFontIdx = 1;
+                this.applyFontSize(this.fontSizes[this.currentFontIdx]);
+                if(localStorage.getItem(this.KEY_REDUCED) === 'true') this.applyReducedMotion(true);
+                if(localStorage.getItem(this.KEY_DYSLEXIC) === 'true') this.applyDyslexic(true);
+            } catch(e) {}
+        },
+        applyHighContrast(on) {
+            document.body.classList.toggle('high-contrast', on);
+            const btn = document.getElementById('highContrastToggle');
+            if(btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        },
+        applyFontSize(size) {
+            document.body.classList.remove('font-size-90','font-size-110','font-size-120','font-size-130');
+            document.body.classList.add('font-size-' + size);
+            const label = document.getElementById('fontSizeLabel');
+            if(label) label.textContent = size + '%';
+        },
+        applyReducedMotion(on) {
+            document.body.classList.toggle('reduced-motion', on);
+            const btn = document.getElementById('reducedMotionToggle');
+            if(btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        },
+        applyDyslexic(on) {
+            document.body.classList.toggle('dyslexic-font', on);
+            const btn = document.getElementById('dyslexicToggle');
+            if(btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+    };
+
+    window.toggleAccessibilityPanel = function() {
+        const panel = document.getElementById('accessPanel');
+        const btn = document.getElementById('accessBtn');
+        if(!panel || !btn) return;
+        const isOpen = panel.classList.toggle('is-active');
+        btn.classList.toggle('is-active', isOpen);
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    };
+
+    window.toggleHighContrast = function() {
+        const isOn = !document.body.classList.contains('high-contrast');
+        Access.applyHighContrast(isOn);
+        try { localStorage.setItem(Access.KEY_CONTRAST, isOn); } catch(e) {}
+        Toast.show(isOn ? 'تم تفعيل وضع التباين العالي' : 'تم إلغاء وضع التباين العالي', 'info', 2000);
+    };
+
+    window.changeFontSize = function(dir) {
+        const newIdx = Access.currentFontIdx + dir;
+        if(newIdx < 0 || newIdx >= Access.fontSizes.length) return;
+        Access.currentFontIdx = newIdx;
+        const size = Access.fontSizes[newIdx];
+        Access.applyFontSize(size);
+        try { localStorage.setItem(Access.KEY_FONT_SIZE, size); } catch(e) {}
+    };
+
+    window.toggleReducedMotion = function() {
+        const isOn = !document.body.classList.contains('reduced-motion');
+        Access.applyReducedMotion(isOn);
+        try { localStorage.setItem(Access.KEY_REDUCED, isOn); } catch(e) {}
+        Toast.show(isOn ? 'تم تفعيل الحركة المخففة' : 'تم إلغاء الحركة المخففة', 'info', 2000);
+    };
+
+    window.toggleDyslexicFont = function() {
+        const isOn = !document.body.classList.contains('dyslexic-font');
+        Access.applyDyslexic(isOn);
+        try { localStorage.setItem(Access.KEY_DYSLEXIC, isOn); } catch(e) {}
+        Toast.show(isOn ? 'تم تفعيل الخط العريض' : 'تم إلغاء الخط العريض', 'info', 2000);
+    };
+
+    document.addEventListener('click', (e) => {
+        const panel = document.getElementById('accessPanel');
+        const btn = document.getElementById('accessBtn');
+        if(panel && btn && panel.classList.contains('is-active') && !panel.contains(e.target) && !btn.contains(e.target)) {
+            panel.classList.remove('is-active');
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // ── 14. EVENTS ──
     function initEvents() {
         if(D.form) D.form.addEventListener('submit', handleSubmit);
 
@@ -808,17 +1404,18 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
         });
     }
 
-    // ── 14. INIT ──
+    // ── 15. INIT ──
     async function init() {
         console.log('🚀 تهيئة صفحة تسجيل الدخول...');
 
         Toast.init();
 
-        // تهيئة قاعدة البيانات (إنشاء بيانات تجريبية إذا كانت فارغة)
         try { await DB.init(); console.log('✅ DB جاهز'); } 
         catch(e) { console.log('⚠️ DB غير متاح:', e); }
 
         initEvents();
+        initForgotEvents();
+        Access.init();
 
         if(LocalAuth.isAuthenticated()){
             console.log('✅ جلسة نشطة');
@@ -834,9 +1431,9 @@ body.light-theme .field-input:-webkit-autofill,.field-input:-webkit-autofill:foc
 
         setTimeout(()=>{ if(D.email) D.email.focus(); }, 600);
 
-        console.log('%c🔒 نظام الشكاوى v2.1', 'color:#D4AF37;font-size:16px;font-weight:900;');
-        console.log('%c✅ DB Module متصل · PasswordUtils نشط', 'color:#39FF14;font-size:11px;');
-        console.log('%c🛡️ TLS 1.3 · SHA-256 · Case-Insensitive Email', 'color:#39FF14;font-size:10px;');
+        console.log('%c🔒 نظام الشكاوى v2.2', 'color:#D4AF37;font-size:16px;font-weight:900;');
+        console.log('%c✅ DB Module متصل · SHA-256 Auth · await مفعّل', 'color:#39FF14;font-size:11px;');
+        console.log('%c🛡️ TLS 1.3 · Case-Insensitive Email', 'color:#39FF14;font-size:10px;');
     }
 
     if(document.readyState === 'loading'){
@@ -856,4 +1453,4 @@ if('serviceWorker' in navigator){
 }
 </script>
 </body>
-</html>
+  </html>
