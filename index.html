@@ -12,6 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Comic+Neue:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- EmailJS Library -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
   --gold:#D4AF37; --gold-light:#F0D060; --gold-dim:rgba(212,175,55,0.18); --gold-glow:rgba(212,175,55,0.35);
@@ -1042,13 +1044,34 @@ body.light-theme .font-size-controls button{background:rgba(0,0,0,0.03);border-c
         Toast.show('تم إعادة إرسال الرمز', 'info', 3000);
     };
 
-    function sendOtp(email) {
-        _otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('📧 OTP sent to', email, ':', _otpCode);
-        try { sessionStorage.setItem('hc_otp_' + email, _otpCode); } catch(e) {}
+    async function sendOtp(email) {
+    _otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // حفظ الرمز محلياً دائماً (حتى لو فشل الإرسال)
+    try { sessionStorage.setItem('hc_otp_' + email, _otpCode); } catch(e) {}
+    
+    // تهيئة EmailJS - ضع مفاتيحك هنا
+    emailjs.init("ja3Upu1pqXjcsvPql");
+    
+    try {
+        // إرسال البريد الفعلي
+        await emailjs.send("service_vnduklb", "YOUR_TEMPLATE_ID", {
+            to_email: email,
+            otp_code: _otpCode,
+            app_name: "نظام الشكاوى الإلكتروني"
+        });
+        
+        console.log('✅ تم إرسال الرمز فعلياً إلى:', email);
+        Toast.show('تم إرسال رمز التحقق إلى بريدك', 'success');
         return true;
+    } catch (error) {
+        console.error('❌ فشل إرسال البريد:', error);
+        // Fallback: عرض الرمز في الصفحة للتجربة
+        console.log('🔑 الرمز (للتجربة فقط):', _otpCode);
+        Toast.show('تعذر الإرسال - الرمز: ' + _otpCode, 'warning', 10000);
+        return false;
     }
-
+    }
     function handleForgotSubmit(e) {
         e.preventDefault();
         const emailInp = document.getElementById('forgotEmail');
