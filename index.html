@@ -1038,41 +1038,52 @@ body.light-theme .font-size-controls button{background:rgba(0,0,0,0.03);border-c
         _otpTimerInterval = setInterval(tick, 1000);
     }
 
-    window.resendOtp = function() {
-        sendOtp(_forgotTargetEmail);
+    // ✅ الإصلاح: resendOtp أصبحت async وتنتظر sendOtp بشكل صحيح
+    window.resendOtp = async function() {
+        const resend = document.getElementById('otpResend');
+        if (resend) resend.disabled = true;
+        const ok = await sendOtp(_forgotTargetEmail);
         startOtpTimer(300);
-        Toast.show('تم إعادة إرسال الرمز', 'info', 3000);
+        if (ok) {
+            Toast.show('تم إعادة إرسال الرمز', 'info', 3000);
+        }
+        // إذا فشل الإرسال، sendOtp نفسها تعرض رسالة التحذير المناسبة
     };
 
+    // ✅ الإصلاح: sendOtp أصبحت async بشكل كامل وتُعيد Promise<boolean>
+    // تنتظر تهيئة EmailJS وعملية الإرسال قبل أن تُرجع أي نتيجة،
+    // بدل أن يستمر تنفيذ الكود المستدعي لها دون انتظار.
     async function sendOtp(email) {
-    _otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // حفظ الرمز محلياً دائماً (حتى لو فشل الإرسال)
-    try { sessionStorage.setItem('hc_otp_' + email, _otpCode); } catch(e) {}
-    
-    // تهيئة EmailJS - ضع مفاتيحك هنا
-    emailjs.init("ja3Upu1pqXjcsvPql");
-    
-    try {
-        // إرسال البريد الفعلي
-        await emailjs.send("service_vnduklb", "template_w3sc8kc", {
-            to_email: email,
-            otp_code: _otpCode,
-            app_name: "نظام الشكاوى الإلكتروني"
-        });
-        
-        console.log('✅ تم إرسال الرمز فعلياً إلى:', email);
-        Toast.show('تم إرسال رمز التحقق إلى بريدك', 'success');
-        return true;
-    } catch (error) {
-        console.error('❌ فشل إرسال البريد:', error);
-        // Fallback: عرض الرمز في الصفحة للتجربة
-        console.log('🔑 الرمز (للتجربة فقط):', _otpCode);
-        Toast.show('تعذر الإرسال - الرمز: ' + _otpCode, 'warning', 10000);
-        return false;
+        _otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // حفظ الرمز محلياً دائماً (حتى لو فشل الإرسال)
+        try { sessionStorage.setItem('hc_otp_' + email, _otpCode); } catch(e) {}
+
+        try {
+            // تهيئة EmailJS
+            emailjs.init("ja3Upu1pqXjcsvPql");
+
+            // انتظار إرسال البريد الفعلي قبل المتابعة
+            await emailjs.send("service_vnduklb", "template_w3sc8kc", {
+                to_email: email,
+                otp_code: _otpCode,
+                app_name: "نظام الشكاوى الإلكتروني"
+            });
+
+            console.log('✅ تم إرسال الرمز فعلياً إلى:', email);
+            return true;
+        } catch (error) {
+            console.error('❌ فشل إرسال البريد:', error);
+            // Fallback: عرض الرمز في الصفحة للتجربة
+            console.log('🔑 الرمز (للتجربة فقط):', _otpCode);
+            Toast.show('تعذر الإرسال - الرمز: ' + _otpCode, 'warning', 10000);
+            return false;
+        }
     }
-    }
-    function handleForgotSubmit(e) {
+
+    // ✅ الإصلاح: handleForgotSubmit أصبحت async وتنتظر sendOtp
+    // قبل الانتقال إلى نافذة إدخال الرمز، بدل فتحها فوراً دون انتظار النتيجة
+    async function handleForgotSubmit(e) {
         e.preventDefault();
         const emailInp = document.getElementById('forgotEmail');
         const errEl = document.getElementById('forgotEmailErr');
@@ -1091,8 +1102,11 @@ body.light-theme .font-size-controls button{background:rgba(0,0,0,0.03);border-c
         }
 
         btn.disabled = true; btn.classList.add('is-loading');
-        sendOtp(email);
+
+        const sent = await sendOtp(email);
         _forgotTargetEmail = email;
+
+        btn.disabled = false; btn.classList.remove('is-loading');
 
         hideForgotModal();
         const otpModal = document.getElementById('otpModal');
@@ -1104,8 +1118,10 @@ body.light-theme .font-size-controls button{background:rgba(0,0,0,0.03);border-c
             }, 300);
         }
         startOtpTimer(300);
-        Toast.show('تم إرسال رمز التحقق إلى بريدك', 'success', 4000);
-        btn.disabled = false; btn.classList.remove('is-loading');
+        if (sent) {
+            Toast.show('تم إرسال رمز التحقق إلى بريدك', 'success', 4000);
+        }
+        // في حال الفشل، sendOtp تكون قد عرضت بالفعل رسالة الرمز الاحتياطي
     }
 
     function handleOtpSubmit(e) {
@@ -1476,4 +1492,4 @@ if('serviceWorker' in navigator){
 }
 </script>
 </body>
-  </html>
+</html>
